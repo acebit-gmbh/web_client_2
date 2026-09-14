@@ -36,6 +36,8 @@
     "oidcFailed": "Error al iniciar sesión a través del proveedor de identidad. Compruebe el URI de redirección y el ID de cliente del proveedor, y que este dispositivo puede acceder a la URL de detección.",
     "oidcValidationFailed": "No se pudo completar el inicio de sesión. Inténtelo de nuevo.",
     "invalidCredentials": "Nombre de usuario o contraseña no válidos",
+    "tfaEmailSendFailed": "El servidor no puede enviar el correo electrónico de verificación en este momento. Póngase en contacto con su administrador.",
+    "tfaEmailMissing": "Su cuenta no tiene una dirección de correo electrónico para la autenticación de dos factores. Póngase en contacto con su administrador.",
     "passkeyCancel": "La autenticación con passkey se ha cancelado",
     "passkeyError": "Error de autenticación con passkey",
     "options": "Opciones"

@@ -36,6 +36,8 @@
     "oidcFailed": "Échec de la connexion via le fournisseur d'identité. Vérifiez l'URI de redirection et l'ID client du fournisseur, et que cet appareil peut atteindre l'URL de découverte.",
     "oidcValidationFailed": "La connexion n'a pas pu être finalisée. Veuillez réessayer.",
     "invalidCredentials": "Nom d'utilisateur ou mot de passe invalide",
+    "tfaEmailSendFailed": "Le serveur ne peut pas envoyer l'e-mail de vérification pour le moment. Veuillez contacter votre administrateur.",
+    "tfaEmailMissing": "Aucune adresse e-mail n'est définie pour l'authentification à deux facteurs de votre compte. Veuillez contacter votre administrateur.",
     "passkeyCancel": "L'authentification par passkey a été annulée",
     "passkeyError": "Échec de l'authentification par passkey",
     "options": "Options"

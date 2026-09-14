@@ -36,6 +36,8 @@
     "oidcFailed": "Anmeldung beim Identitätsanbieter fehlgeschlagen. Prüfen Sie die Redirect-URI und die Client-ID des Anbieters und ob dieses Gerät die Discovery-URL erreicht.",
     "oidcValidationFailed": "Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
     "invalidCredentials": "Ung\u00fcltiger Benutzername oder Passwort",
+    "tfaEmailSendFailed": "Der Server kann die Bestätigungs-E-Mail derzeit nicht senden. Bitte wenden Sie sich an Ihren Administrator.",
+    "tfaEmailMissing": "Für Ihr Konto ist keine E-Mail-Adresse für die Zwei-Faktor-Authentifizierung hinterlegt. Bitte wenden Sie sich an Ihren Administrator.",
     "passkeyCancel": "Passkey-Authentifizierung wurde abgebrochen",
     "passkeyError": "Passkey-Authentifizierung fehlgeschlagen",
     "options": "Optionen"

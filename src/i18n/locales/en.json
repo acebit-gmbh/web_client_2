@@ -36,6 +36,8 @@
     "oidcFailed": "Sign-in via the identity provider failed. Verify the provider's redirect URI, client ID, and that this device can reach the discovery URL.",
     "oidcValidationFailed": "Sign-in could not be completed. Please try again.",
     "invalidCredentials": "Invalid username or password",
+    "tfaEmailSendFailed": "The server cannot send the verification email right now. Please contact your administrator.",
+    "tfaEmailMissing": "Your account has no email address for two-factor authentication. Please contact your administrator.",
     "passkeyCancel": "Passkey authentication was cancelled",
     "passkeyError": "Passkey authentication failed",
     "options": "Options"

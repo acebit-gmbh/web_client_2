@@ -36,6 +36,8 @@
     "oidcFailed": "Aanmelden via de identiteitsprovider is mislukt. Controleer de redirect-URI en client-ID van de provider en of dit apparaat de discovery-URL kan bereiken.",
     "oidcValidationFailed": "De aanmelding kon niet worden voltooid. Probeer het opnieuw.",
     "invalidCredentials": "Ongeldige gebruikersnaam of ongeldig wachtwoord",
+    "tfaEmailSendFailed": "De server kan de verificatie-e-mail momenteel niet verzenden. Neem contact op met uw beheerder.",
+    "tfaEmailMissing": "Voor uw account is geen e-mailadres ingesteld voor tweefactorauthenticatie. Neem contact op met uw beheerder.",
     "passkeyCancel": "Passkey-verificatie is geannuleerd",
     "passkeyError": "Passkey-verificatie is mislukt",
     "options": "Opties"

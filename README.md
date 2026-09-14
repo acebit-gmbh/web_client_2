@@ -269,6 +269,7 @@ The web client's URL must be registered as a redirect URI in the Azure AD app re
 
 - **HTTP 459** -- 2FA not yet activated. The web client displays the QR code for authenticator app setup, then prompts for the 6-digit code.
 - **HTTP 460** -- 2FA code required. The web client prompts for the 6-digit verification code.
+- **HTTP 401 with error.code 4012 / 4013** (Server 20+) -- the server cannot send the verification e-mail / the account has no e-mail address. Shown as a localized "contact your administrator" message, never as a wrong password; any other 401 shows the server's message.
 
 The full original login request (including OIDC/Azure tokens) is preserved and resent with the `tfacode` field appended.
 

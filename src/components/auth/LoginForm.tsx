@@ -27,6 +27,7 @@ import {
 } from '@/lib/oidc'
 import { getConfig } from '@/lib/config'
 import { ApiError } from '@/api/client'
+import { describeLoginError } from '@/lib/apiErrors'
 import {
   getCachedProviders,
   setCachedProviders,
@@ -269,7 +270,7 @@ export function LoginForm() {
             setTfaState({ isSetup: false, deliveryInfo: err.message })
             setLoginPhase('tfa')
           } else {
-            setLoginError(err.message)
+            setLoginError(describeLoginError(err, t))
           }
         } else {
           setLoginError(t('login.unexpectedError'))
@@ -345,7 +346,7 @@ export function LoginForm() {
           })
           setLoginPhase('tfa')
         } else {
-          setLoginError(err.message)
+          setLoginError(describeLoginError(err, t))
         }
       } else {
         const detail = err instanceof Error ? err.message : String(err)

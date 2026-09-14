@@ -1,11 +1,25 @@
 import { describe, it, expect } from 'vitest'
 import type { TFunction } from 'i18next'
-import { describeApiError } from './apiErrors'
+import { describeApiError, describeLoginError } from './apiErrors'
 import { ApiError } from '@/api/client'
 
 // Test double for i18next's `t`. Returns the key so we can assert which
 // fallback was selected without depending on locale files.
 const t = ((key: string) => key) as unknown as TFunction
+
+describe('describeLoginError', () => {
+  it.each([
+    [401, 4012, 'm', 'login.tfaEmailSendFailed'],
+    [401, 4013, 'm', 'login.tfaEmailMissing'],
+    [401, 401, 'm', 'm'],
+    [403, 4012, 'm', 'm'],
+    [401, 4099, 'm', 'm'],
+    [401, 401, '', 'login.unexpectedError'],
+    [460, 460, 'Code sent', 'Code sent'],
+  ])('status %i, code %i, message %j -> %j', (status, code, message, expected) => {
+    expect(describeLoginError(new ApiError(status, code, message), t)).toBe(expected)
+  })
+})
 
 describe('describeApiError', () => {
   describe('ApiError', () => {

@@ -8,7 +8,8 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { getServerOrigin } from '@/api/client'
+import { ApiError, getServerOrigin } from '@/api/client'
+import { describeLoginError } from '@/lib/apiErrors'
 
 interface TfaInlineProps {
   deliveryInfo: string
@@ -38,7 +39,13 @@ export function TfaInline({
     try {
       await onSubmit(code)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('login.unexpectedError'))
+      setError(
+        err instanceof ApiError
+          ? describeLoginError(err, t)
+          : err instanceof Error
+            ? err.message
+            : t('login.unexpectedError'),
+      )
       setCode('')
     } finally {
       setIsSubmitting(false)
