@@ -161,6 +161,8 @@ export interface EntryCompact {
   id: string
   name: string
   has_second_pass: boolean
+  /** Server 20.0.0+: a one-time code can be read with getEntryOtp. Absent on older servers. */
+  has_otp?: boolean
   login?: string | null
   url?: string | null
   icon?: string
@@ -319,6 +321,18 @@ export interface PasskeyFields {
   key?: string
 }
 
+// ─── One-Time Code (GET /entries/{id}/otp) ───────────────────
+
+export interface EntryOtp {
+  /** The current code. A string: leading zeros are part of it - never parse it as a number. */
+  code: string
+  digits: number
+  period: number
+  /** Whole seconds until the code changes (server clock); the time actually left is in (expires_in - 1, expires_in]. */
+  expires_in: number
+  algorithm: 'SHA1' | 'SHA256' | 'SHA512'
+}
+
 // ─── Entry Detail (full representation) ──────────────────────
 
 export interface EntryDetail {
@@ -327,6 +341,8 @@ export interface EntryDetail {
   id: string
   name: string
   has_second_pass: boolean
+  /** Server 20.0.0+: a one-time code can be read with getEntryOtp. Absent on older servers. */
+  has_otp?: boolean
   author?: string
   image_custom?: boolean
   image_index?: number

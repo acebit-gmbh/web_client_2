@@ -9,6 +9,7 @@ import {
 import type {
   EntryDetail,
   EntryCompact,
+  EntryOtp,
   CreateEntryRequest,
   UpdateEntryRequest,
   MoveRequest,
@@ -41,6 +42,24 @@ export function getEntry(
   secondPassword?: string,
 ): Promise<EntryDetail> {
   return apiClient<EntryDetail>(`/databases/${dbId}/entries/${entryId}`, {
+    secondPassword,
+  })
+}
+
+/**
+ * The entry's current one-time code (Server 20.0.0+; check `has_otp` first).
+ * Every call is an audited read on the server and fires "password accessed"
+ * alerts, so fetch on an explicit user action, never on a timer. Long-lived
+ * API tokens are refused. Errors to tell apart by `ApiError.code`:
+ * 4031 wrong/missing second password (for a link, possibly the target's),
+ * 4041 the entry has no one-time code, plain 403 no permission or sealed.
+ */
+export function getEntryOtp(
+  dbId: string,
+  entryId: string,
+  secondPassword?: string,
+): Promise<EntryOtp> {
+  return apiClient<EntryOtp>(`/databases/${dbId}/entries/${entryId}/otp`, {
     secondPassword,
   })
 }
