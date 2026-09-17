@@ -489,6 +489,7 @@ export default function VaultPage() {
           open
           onClose={newEntryDialog.close}
           defaultType={newEntryType}
+          dbId={currentDatabaseId}
           onSubmit={async (data) => { await createEntryMut.mutateAsync(data) }}
           isSubmitting={createEntryMut.isPending}
         />
@@ -508,6 +509,7 @@ export default function VaultPage() {
           open={editEntryDialog.isOpen}
           onClose={editEntryDialog.close}
           entry={editingEntry}
+          dbId={currentDatabaseId}
           onSubmit={async (data) => {
             await updateEntryMut.mutateAsync({ entryId: selectedEntryId!, data, secondPassword: selectedSecondPassword })
           }}

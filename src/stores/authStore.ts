@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { UserProfile } from '@/api/types'
 import { useSecondPasswordStore } from './secondPasswordStore'
+import { useTotpCapabilityStore } from './totpCapabilityStore'
 import { useNavigationStore } from './navigationStore'
 import { useConnectionStore } from './connectionStore'
 import { clearClipboard } from '@/lib/clipboard'
@@ -81,6 +82,9 @@ export const useAuthStore = create<AuthState>()(
         }
 
         useSecondPasswordStore.getState().clearAll()
+        // The next login may be to another server: forget what this one said
+        // about one-time-code writes.
+        useTotpCapabilityStore.getState().clearAll()
         // Wipe any password / sensitive data still on the OS clipboard so a
         // 30-second auto-clear window doesn't outlive the session.
         clearClipboard()

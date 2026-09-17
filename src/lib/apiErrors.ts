@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next'
 import { ApiError } from '@/api/client'
+import type { TotpField } from '@/lib/totp'
 
 /**
  * Classifies a thrown value into a user-facing message. The PD Server's own
@@ -46,6 +47,102 @@ export function describeLoginError(err: ApiError, t: TFunction): string {
     if (err.code === ERRCODE_2FA_EMAIL_MISSING) return t('login.tfaEmailMissing')
   }
   return err.message || t('login.unexpectedError')
+}
+
+/** HTTP 403 sub-code: wrong or missing second password (all server versions). */
+export const ERRCODE_INVALID_SECOND_PASS = 4031
+/** PD Server 20+: HTTP 404 sub-code from GET /entries/{id}/otp - the entry exists but has no one-time code. */
+export const ERRCODE_NO_ONE_TIME_CODE = 4041
+
+/**
+ * Message for a failed one-time-code read. Status first, then code, never
+ * the server's message: the same neutral wording is wanted whatever language
+ * the server runs in, and a plain 403 (no permission, sealed, API token)
+ * must read as "not for you" rather than hint at why. 4031 is normally
+ * answered by prompting for the second password before this is shown.
+ */
+export function describeOtpError(status: number, code: number, t: TFunction): string {
+  if (status === 403) {
+    return code === ERRCODE_INVALID_SECOND_PASS
+      ? t('secondPassword.wrongPassword')
+      : t('entry.oneTimeCode.notAvailable')
+  }
+  if (status === 404) {
+    return code === ERRCODE_NO_ONE_TIME_CODE ? t('entry.oneTimeCode.none') : t('errors.notFound')
+  }
+  if (status === 501) return t('entry.oneTimeCode.unsupported')
+  return t('entry.oneTimeCode.loadFailed')
+}
+
+/** PD Server 20+: HTTP 400 sub-codes for a refused `totp` write, first failing member in server order. */
+export const ERRCODE_TOTP_SECRET = 4001
+export const ERRCODE_TOTP_ALGORITHM = 4002
+export const ERRCODE_TOTP_DIGITS = 4003
+export const ERRCODE_TOTP_PERIOD = 4004
+/** `{}`, an unknown member, a wrong JSON type, or no `secret` where one is required. */
+export const ERRCODE_TOTP_SHAPE = 4005
+/** The entry's type (after the request) cannot carry a one-time code written over REST. */
+export const ERRCODE_TOTP_ENTRY_TYPE = 4006
+/** PD Server 20+: HTTP 403 sub-code - a `totp` update needs read permission on the entry. */
+export const ERRCODE_TOTP_READ_REQUIRED = 4033
+
+/** The write-form member a refusal names, for highlighting the input; null for the others. */
+export function totpRefusedField(status: number, code: number): TotpField | null {
+  if (status !== 400) return null
+  switch (code) {
+    case ERRCODE_TOTP_SECRET:
+      return 'secret'
+    case ERRCODE_TOTP_ALGORITHM:
+      return 'algorithm'
+    case ERRCODE_TOTP_DIGITS:
+      return 'digits'
+    case ERRCODE_TOTP_PERIOD:
+      return 'period'
+    default:
+      return null
+  }
+}
+
+/**
+ * Message for a `totp` write the server refused, or null when the error is
+ * not one of the one-time-code refusals (the caller falls back to its usual
+ * handling). Status first, then code, never the server's message: the
+ * wording must be the browser's language and must never echo anything the
+ * user typed. A plain 403 (no update permission, sealed) and 4031 are not
+ * TOTP-specific and are left to the existing flows.
+ *
+ * `secretSent` says whether the request carried a `secret`: 4001 answered
+ * to a parameter-only change means the stored seed (which the user never
+ * saw) no longer produces a code, not that an empty input is malformed.
+ */
+export function describeTotpWriteError(
+  status: number,
+  code: number,
+  t: TFunction,
+  secretSent = true,
+): string | null {
+  if (status === 400) {
+    if (code === ERRCODE_TOTP_SECRET && !secretSent) {
+      return t('entryForm.oneTimeCode.errors.storedSecret')
+    }
+    const field = totpRefusedField(status, code)
+    if (field) return t(`entryForm.oneTimeCode.errors.${field}`)
+    if (code === ERRCODE_TOTP_SHAPE) return t('entryForm.oneTimeCode.errors.shape')
+    if (code === ERRCODE_TOTP_ENTRY_TYPE) return t('entryForm.oneTimeCode.errors.entryType')
+    return null
+  }
+  if (status === 403 && code === ERRCODE_TOTP_READ_REQUIRED) {
+    return t('entryForm.oneTimeCode.errors.readRequired')
+  }
+  return null
+}
+
+/** True for an error the entry form explains inline itself (see describeTotpWriteError). */
+export function isTotpWriteRefusal(err: unknown): boolean {
+  if (!(err instanceof ApiError)) return false
+  if (err.status === 400)
+    return err.code >= ERRCODE_TOTP_SECRET && err.code <= ERRCODE_TOTP_ENTRY_TYPE
+  return err.status === 403 && err.code === ERRCODE_TOTP_READ_REQUIRED
 }
 
 function defaultMessageForStatus(status: number, t: TFunction): string {

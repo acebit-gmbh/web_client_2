@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpDown, ArrowUp, ArrowDown, Lock, Folder as FolderIcon, ExternalLink } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown, Lock, KeyRound, Folder as FolderIcon, ExternalLink } from 'lucide-react'
 import { EntryIcon } from './EntryIcon'
 import { useSortedItems, type SortField, type SortConfig } from '@/hooks/useSortedItems'
 import { formatRelativeDate } from '@/lib/dates'
@@ -65,6 +65,16 @@ const EntryRow = memo(function EntryRow({
         <span className="truncate text-sm font-medium">{item.name}</span>
         {item.has_second_pass && (
           <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
+        )}
+        {!folder && item.has_otp && (
+          <span
+            role="img"
+            aria-label={t('entry.oneTimeCode.hasCode')}
+            title={t('entry.oneTimeCode.hasCode')}
+            className="flex shrink-0"
+          >
+            <KeyRound className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+          </span>
         )}
       </div>
 

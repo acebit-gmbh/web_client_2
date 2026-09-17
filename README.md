@@ -16,6 +16,7 @@ The web client provides browser-based access to Password Depot vaults with suppo
 - **6 authentication methods** -- Standard, SSPI, Windows SSO (Negotiate), Passkey (WebAuthn), OIDC, Azure AD
 - **Two-factor authentication** -- TOTP setup and verification
 - **Second password protection** -- per-entry/folder unlock with session caching
+- **One-time codes** -- shows an entry's current TOTP code on request, with countdown and 20-second clipboard auto-clear; the entry form sets, replaces or removes the secret (typed, or pasted as an `otpauth://` link) for password, credit card, license, banking and custom entries (Server 20.0.0+)
 - **Session management** -- 10-minute inactivity timeout with warning, auto-logout
 - **Responsive design** -- desktop, tablet, and mobile layouts
 - **Internationalization** -- English, German, French, Spanish, and Dutch
@@ -39,7 +40,7 @@ The web client provides browser-based access to Password Depot vaults with suppo
 
 - **Node.js** 20 or later
 - **npm** 10 or later (ships with Node.js 20+)
-- **Password Depot Enterprise Server** 19.x running with REST API v2.0 enabled
+- **Password Depot Enterprise Server** 19.x running with REST API v2.0 enabled (20.0.0 or later for one-time codes)
 
 ## Getting Started
 
@@ -332,6 +333,7 @@ Full API documentation: **https://github.com/acebit-gmbh/pd_rest_api** (also pub
 | GET | `/databases/{db}/children` | Root-level folders and entries |
 | GET | `/databases/{db}/folders/{id}/children` | Folder contents |
 | GET | `/databases/{db}/entries/{id}` | Full entry details |
+| GET | `/databases/{db}/entries/{id}/otp` | Current one-time code (Server 20.0.0+) |
 | POST | `/databases/{db}/entries` | Create entry |
 | PATCH | `/databases/{db}/entries/{id}` | Update entry |
 | DELETE | `/databases/{db}/entries/{id}` | Delete entry |
@@ -350,6 +352,8 @@ Full API documentation: **https://github.com/acebit-gmbh/pd_rest_api** (also pub
 - **No server-side sorting** -- the client implements sorting locally
 - **Compact vs. full representations** -- list endpoints return compact objects (no passwords); detail endpoints return full objects
 - **Pagination** -- all list endpoints support `offset` and `limit` query parameters
+- **One-time codes on request only** -- `/otp` is an audited read that fires "password accessed" alerts, so the client fetches a code only when the user clicks *Show code*, never on a timer or on tab focus. Codes are never computed client-side; the seed stays on the server. Entries carry `has_otp` (and `totp`) only on Server 20.0.0+, so their absence means the feature is unavailable.
+- **One-time code secrets are write-only** -- no route ever returns a stored seed, so the entry form shows only the stored parameters and a *Replace* means typing or pasting a whole new secret. The `totp` request key is sent only when the server has shown it accepts it (the loaded entry, or any listed entry of the database, carries `totp`); it is omitted when untouched, `null` to remove, and carries all four members whenever a secret is sent. Unknown request keys are ignored by older servers, so the client never probes by writing.
 
 ## Contributing
 

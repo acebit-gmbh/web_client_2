@@ -13,9 +13,29 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PasswordGenerator } from '@/components/common/PasswordGenerator'
-import type { EntryDetail, EntryType, CreateEntryRequest } from '@/api/types'
+import { TotpSection } from './TotpSection'
+import { useTotpCapability } from '@/hooks/useTotpCapability'
+import { ApiError } from '@/api/client'
+import { describeTotpWriteError, totpRefusedField } from '@/lib/apiErrors'
+import {
+  buildTotpWrite,
+  isTotpWritableType,
+  TOTP_UNTOUCHED,
+  validateTotpDraft,
+  type StoredTotpParams,
+  type TotpEdit,
+  type TotpField,
+} from '@/lib/totp'
+import type { EntryDetail, EntryType, CreateEntryRequest, TotpWrite } from '@/api/types'
 
 const MM_YYYY_RE = /^(0[1-9]|1[0-2])\/\d{4}$/
+
+/**
+ * The `totp.state` values the editor knows how to present. The API asks
+ * that a state a later server adds be treated like `hidden` - no code, no
+ * editor - so the gate names these instead of excluding `hidden` alone.
+ */
+const EDITABLE_TOTP_STATES: readonly string[] = ['none', 'set', 'invalid']
 
 /** Auto-insert the slash and keep only digits so the input stays in MM/YYYY shape. */
 function formatMmYyyy(raw: string): string {
@@ -31,6 +51,12 @@ interface EntryFormDialogProps {
   entry?: EntryDetail | null
   /** Pre-selected type for new entries */
   defaultType?: EntryType
+  /**
+   * Database the entry lives in. Only the create form needs it, to learn
+   * from the database's cached listings whether the server accepts
+   * one-time-code settings (see useTotpCapability).
+   */
+  dbId?: string | null
   /** Called with the form data */
   onSubmit: (data: CreateEntryRequest) => Promise<void>
   isSubmitting: boolean
@@ -41,6 +67,7 @@ export function EntryFormDialog({
   onClose,
   entry,
   defaultType = 'password',
+  dbId,
   onSubmit,
   isSubmitting,
 }: EntryFormDialogProps) {
@@ -76,6 +103,41 @@ export function EntryFormDialog({
   const [putty, setPutty] = useState(entry?.putty ?? {})
   const [teamviewer, setTeamviewer] = useState(entry?.teamviewer ?? {})
 
+  // One-time code (Server 20.0.0+). The editor is invisible unless the server
+  // has shown that it accepts the `totp` key: on edit the loaded entry carries
+  // `totp` (and says whether this entry's type is writable; `hidden` means we
+  // may not read it, and a write would be refused with 4033; an unknown state
+  // counts as `hidden`), on create a compact row of the database has. Older
+  // servers ignore unknown keys, so there is no way to find out by trying.
+  const serverWritesTotp = useTotpCapability(isEditing ? null : (dbId ?? null))
+  const showTotp = isEditing
+    ? !!entry.totp &&
+      entry.totp.writable !== false &&
+      EDITABLE_TOTP_STATES.includes(entry.totp.state)
+    : serverWritesTotp === true && isTotpWritableType(type)
+  const storedTotp: StoredTotpParams | null =
+    entry?.totp && (entry.totp.state === 'set' || entry.totp.state === 'invalid')
+      ? {
+          algorithm: entry.totp.algorithm ?? null,
+          digits: entry.totp.digits ?? NaN,
+          period: entry.totp.period ?? NaN,
+        }
+      : null
+  const [totp, setTotp] = useState<TotpEdit>(TOTP_UNTOUCHED)
+  const [totpInvalid, setTotpInvalid] = useState<TotpField | null>(null)
+
+  function handleTotpChange(next: TotpEdit) {
+    setTotp(next)
+    setTotpInvalid(null)
+  }
+
+  // The secret must not outlive the dialog: drop the editing state on every
+  // way out (the parents also unmount the dialog, this makes it explicit).
+  function handleClose() {
+    setTotp(TOTP_UNTOUCHED)
+    onClose()
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
@@ -85,6 +147,25 @@ export function EntryFormDialog({
       if (!MM_YYYY_RE.test(creditCard.valid_thru)) {
         setError(t('entryForm.invalidValidThru'))
         return
+      }
+    }
+
+    // `totp` is built explicitly, never through clearable(): untouched omits
+    // the key, remove sends the literal null, a new secret sends all four
+    // members, a parameter change without a secret sends the parameters
+    // only. An empty string would be a shape error (4005), not a clear. The
+    // server's admission rules are applied here first so a typo is caught
+    // without a round trip; the server judges again.
+    let totpWrite: TotpWrite | null | undefined
+    if (showTotp) {
+      totpWrite = buildTotpWrite(totp, storedTotp)
+      if (totpWrite) {
+        const failing = validateTotpDraft(totpWrite)
+        if (failing) {
+          setTotpInvalid(failing)
+          setError(t(`entryForm.oneTimeCode.errors.${failing}`))
+          return
+        }
       }
     }
 
@@ -150,19 +231,37 @@ export function EntryFormDialog({
       if (type === 'teamviewer') Object.assign(base, { teamviewer })
     }
 
+    if (totpWrite !== undefined) {
+      base.totp = totpWrite
+    }
+
     try {
       await onSubmit(base)
-      onClose()
-    } catch {
+      handleClose()
+    } catch (err) {
       // The save failure is surfaced by the mutation's onError toast; showing
       // an inline alert here too would duplicate the same message. Swallow the
       // rejection so the dialog stays open (without closing) for a retry.
+      // The exception is a refused one-time-code write (4001-4006, 4033): the
+      // toast skips those, and this form names the member in the browser's
+      // language - status first, then code, never the server's text. A 4001
+      // to a parameter-only change means the stored seed produces no code;
+      // the secret input is still the one to highlight, since a new secret
+      // is the repair.
+      if (err instanceof ApiError) {
+        const secretSent = !!totpWrite && 'secret' in totpWrite
+        const message = describeTotpWriteError(err.status, err.code, t, secretSent)
+        if (message) {
+          setTotpInvalid(totpRefusedField(err.status, err.code))
+          setError(message)
+        }
+      }
     }
   }
 
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
       <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -349,6 +448,19 @@ export function EntryFormDialog({
             ]} />
           )}
 
+          {/* One-time code (Server 20.0.0+) — only when the server has shown it accepts it */}
+          {showTotp && (
+            <>
+              <Separator />
+              <TotpSection
+                stored={entry?.totp}
+                value={totp}
+                onChange={handleTotpChange}
+                invalidField={totpInvalid}
+              />
+            </>
+          )}
+
           <Separator />
 
           {/* Common fields */}
@@ -414,7 +526,7 @@ export function EntryFormDialog({
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+            <Button type="button" variant="outline" className="flex-1" onClick={handleClose}>
               {t('common.cancel')}
             </Button>
             <Button type="submit" className="flex-1" disabled={!name.trim() || isSubmitting}>

@@ -8,12 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { EntryIcon } from './EntryIcon'
 import { EntryTypeRouter } from './EntryTypeRouter'
+import { OneTimeCodeField } from './OneTimeCodeField'
 import { SecondPasswordPrompt } from '@/components/common/SecondPasswordPrompt'
 import { useEntry } from '@/hooks/useEntry'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { getEntry } from '@/api/entries'
-import { describeApiError } from '@/lib/apiErrors'
+import { describeApiError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
 import type { ApiError } from '@/api/client'
 import type { EntryCompact } from '@/api/types'
 
@@ -80,8 +81,11 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
   // server-side second-password cache can expire independently), clear it and
   // drop the errored cache entry — clearing the stored password flips
   // needsSecondPassword back on, which re-opens the prompt automatically.
-  const errorStatus = (error as ApiError | null)?.status
-  const isWrongPassword = errorStatus === 403 && !!secondPassword
+  // Only 4031 means "wrong second password" (19.x and 20.x alike); a plain
+  // 403 (no permission, sealed) must not throw the password away and re-ask.
+  const apiError = error as ApiError | null
+  const isWrongPassword =
+    apiError?.status === 403 && apiError.code === ERRCODE_INVALID_SECOND_PASS && !!secondPassword
   useEffect(() => {
     if (isWrongPassword && entryId) {
       clearSecondPassword(entryId)
@@ -117,7 +121,8 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
     entry?.credit_card || entry?.license || entry?.identity ||
     entry?.information?.text || entry?.banking || entry?.rdp ||
     entry?.putty || entry?.teamviewer || entry?.document ||
-    entry?.passkey || (entry?.custom_fields && entry.custom_fields.length > 0))
+    entry?.passkey || entry?.has_otp ||
+    (entry?.custom_fields && entry.custom_fields.length > 0))
 
   return (
     <div className="lg:flex lg:h-full lg:flex-col">
@@ -155,6 +160,16 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
           <div className="space-y-4">
             {/* Type-specific fields */}
             <EntryTypeRouter entry={entry} />
+
+            {/* One-time code (Server 20.0.0+) - fetched only when the user asks for it */}
+            {entry.has_otp === true && (
+              <OneTimeCodeField
+                dbId={dbId}
+                entryId={entry.id}
+                entryName={compactEntry.name}
+                entryType={typeName}
+              />
+            )}
 
             {/* Metadata section — separator only if type fields were shown */}
             {hasMetadata && (
@@ -262,7 +277,7 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
           open={showSecondPasswordPrompt}
           onClose={() => selectEntry(null)}
           entryName={compactEntry.name}
-          entryType={compactEntry.type}
+          entryType={typeName}
           onSubmit={handleSecondPasswordSubmit}
         />
       )}

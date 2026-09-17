@@ -5,7 +5,7 @@ import type { CreateEntryRequest, UpdateEntryRequest, MoveRequest } from '@/api/
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { useToast } from '@/hooks/useToast'
-import { describeApiError } from '@/lib/apiErrors'
+import { describeApiError, isTotpWriteRefusal } from '@/lib/apiErrors'
 
 export function useCreateEntry(dbId: string) {
   const queryClient = useQueryClient()
@@ -21,6 +21,10 @@ export function useCreateEntry(dbId: string) {
       toast.success(t('toast.entryCreated'))
     },
     onError: (err) => {
+      // A refused one-time-code write is explained inline by the entry form,
+      // in the browser's language and pointing at the field; a toast with the
+      // server's wording on top would contradict it.
+      if (isTotpWriteRefusal(err)) return
       toast.error(describeApiError(err, t), {
         title: t('toast.entryCreateFailed'),
       })
@@ -50,6 +54,8 @@ export function useUpdateEntry(dbId: string) {
       toast.success(t('toast.entryUpdated'))
     },
     onError: (err) => {
+      // See useCreateEntry: the entry form owns the message for these.
+      if (isTotpWriteRefusal(err)) return
       toast.error(describeApiError(err, t), {
         title: t('toast.entryUpdateFailed'),
       })

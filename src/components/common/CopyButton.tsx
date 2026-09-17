@@ -7,16 +7,18 @@ import { copyToClipboard } from '@/lib/clipboard'
 interface CopyButtonProps {
   value: string
   label?: string
+  /** Overrides the user's clipboard auto-clear setting (milliseconds). */
+  autoClearMs?: number
 }
 
-export function CopyButton({ value, label }: CopyButtonProps) {
+export function CopyButton({ value, label, autoClearMs }: CopyButtonProps) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const [failed, setFailed] = useState(false)
 
   const handleCopy = useCallback(async () => {
     try {
-      await copyToClipboard(value)
+      await copyToClipboard(value, autoClearMs)
       setFailed(false)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -25,7 +27,7 @@ export function CopyButton({ value, label }: CopyButtonProps) {
       setFailed(true)
       setTimeout(() => setFailed(false), 2000)
     }
-  }, [value])
+  }, [value, autoClearMs])
 
   const icon = copied ? (
     <Check className="h-3 w-3" />

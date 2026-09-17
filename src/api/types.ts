@@ -163,6 +163,8 @@ export interface EntryCompact {
   has_second_pass: boolean
   /** Server 20.0.0+: a one-time code can be read with getEntryOtp. Absent on older servers. */
   has_otp?: boolean
+  /** Server 20.0.0+: seedless one-time-code settings; absent on older servers. */
+  totp?: EntryTotp
   login?: string | null
   url?: string | null
   icon?: string
@@ -333,6 +335,25 @@ export interface EntryOtp {
   algorithm: 'SHA1' | 'SHA256' | 'SHA512'
 }
 
+/**
+ * Server 20.0.0+: the entry's one-time-code settings without the seed, on
+ * every entry representation. `state` is `hidden` (you may not read the
+ * entry), `unsupported` (entry type), `set`, `invalid` (a seed is stored
+ * but produces no code) or `none`; `has_otp` equals `state === 'set'`. The
+ * compact form carries `state` only; the full form adds `writable` and, for
+ * set/invalid, the stored parameters (`algorithm` is null for a value the
+ * server does not know). Its presence - not its value - tells a client that
+ * the server accepts `totp` on create and update; older servers omit it.
+ */
+export interface EntryTotp {
+  state: string
+  writable?: boolean
+  digits?: number
+  period?: number
+  algorithm?: string | null
+  conforming?: boolean
+}
+
 // ─── Entry Detail (full representation) ──────────────────────
 
 export interface EntryDetail {
@@ -343,6 +364,8 @@ export interface EntryDetail {
   has_second_pass: boolean
   /** Server 20.0.0+: a one-time code can be read with getEntryOtp. Absent on older servers. */
   has_otp?: boolean
+  /** Server 20.0.0+: seedless one-time-code settings; absent on older servers. */
+  totp?: EntryTotp
   author?: string
   image_custom?: boolean
   image_index?: number
@@ -385,6 +408,25 @@ export interface EntryDetail {
 
 // ─── Mutation Requests ───────────────────────────────────────
 
+export type TotpAlgorithm = 'SHA1' | 'SHA256' | 'SHA512'
+
+/**
+ * Server 20.0.0+: the write form of the `totp` key on create and update
+ * (seedless `EntryTotp` is what comes back). `secret` is write-only Base32
+ * and required on create; on update an absent `secret` keeps the stored seed
+ * and only the members sent are applied. Send all four members whenever you
+ * send a secret. `null` removes the code on update (and is a no-op on
+ * create); an empty string is a shape error, never a clear. The key is
+ * ignored by older servers, so send it only when the server reports `totp`
+ * on its entries.
+ */
+export interface TotpWrite {
+  secret?: string
+  algorithm?: TotpAlgorithm
+  digits?: number
+  period?: number
+}
+
 export interface CreateEntryRequest {
   type?: EntryType
   name: string
@@ -400,6 +442,8 @@ export interface CreateEntryRequest {
   expires_at?: string | null
   /** Standard icon index — see lib/icons.ts#getDefaultImageIndex */
   image_index?: number
+  /** Server 20.0.0+: one-time-code settings; `null` is accepted as a no-op here. */
+  totp?: TotpWrite | null
   // Type-specific sub-objects
   credit_card?: CreditCardFields
   license?: LicenseFields
@@ -423,6 +467,8 @@ export interface UpdateEntryRequest {
   custom_fields?: CustomField[]
   urls?: string[]
   expires_at?: string | null
+  /** Server 20.0.0+: one-time-code settings; absent = untouched, `null` = remove. */
+  totp?: TotpWrite | null
   // Type-specific sub-objects
   credit_card?: CreditCardFields
   license?: LicenseFields

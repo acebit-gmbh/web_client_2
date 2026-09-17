@@ -126,7 +126,18 @@
     "keyPass": "Frase de contraseña de la clave",
     "revealPassword": "Mostrar valor",
     "hidePassword": "Ocultar valor",
-    "detailsTitle": "Detalles de la entrada"
+    "detailsTitle": "Detalles de la entrada",
+    "oneTimeCode": {
+      "label": "Código de un solo uso",
+      "show": "Mostrar código",
+      "hide": "Ocultar código",
+      "hasCode": "Tiene un código de un solo uso",
+      "secondsLeft": "quedan {{seconds}} s",
+      "notAvailable": "El código de un solo uso no está disponible para usted.",
+      "none": "Esta entrada no tiene código de un solo uso.",
+      "unsupported": "Los códigos de un solo uso no están disponibles para este tipo de entrada.",
+      "loadFailed": "No se pudo cargar el código de un solo uso."
+    }
   },
   "document": {
     "downloadWarningTitle": "Descargar documento confidencial",
@@ -275,7 +286,46 @@
     "linkedNotice": "El usuario y la contraseña de esta entrada están vinculados a otra entrada y no se pueden editar aquí.",
     "importanceLow": "Baja",
     "importanceNormal": "Normal",
-    "importanceHigh": "Alta"
+    "importanceHigh": "Alta",
+    "oneTimeCode": {
+      "title": "Código de un solo uso",
+      "add": "Añadir código de un solo uso",
+      "replace": "Sustituir código de un solo uso",
+      "remove": "Eliminar código de un solo uso",
+      "removeTitle": "Eliminar código de un solo uso",
+      "removeDesc": "El secreto se elimina del servidor al guardar. Para configurar el código de nuevo se necesita un secreto nuevo del servicio.",
+      "removePending": "El código de un solo uso se eliminará al guardar.",
+      "keep": "Conservar el código de un solo uso",
+      "discard": "Descartar cambios",
+      "storedSummary": "{{algorithm}} · {{digits}} dígitos · cada {{period}} s",
+      "unknownAlgorithm": "algoritmo desconocido",
+      "invalidNotice": "El secreto guardado no genera ningún código. Sustitúyalo para reparar la entrada.",
+      "nonConformingNotice": "La configuración guardada está fuera del rango aceptado (6 a 8 dígitos, 15 a 120 segundos). Al guardar se ajustará al rango.",
+      "paste": "Enlace de configuración o secreto",
+      "pastePlaceholder": "otpauth://totp/… o el secreto",
+      "pasteHint": "Pegue el enlace otpauth:// del servicio o su secreto. Aquí todavía no se pueden escanear códigos QR.",
+      "pasteInvalid": "No se pudo leer el enlace pegado. Solo se admiten enlaces otpauth:// para códigos basados en tiempo.",
+      "filledFrom": "Rellenado a partir del enlace de {{source}}.",
+      "filledFromLink": "Rellenado a partir del enlace pegado.",
+      "secret": "Secreto",
+      "secretPlaceholderNew": "Secreto Base32 del servicio",
+      "secretPlaceholderKeep": "Dejar vacío para conservar el secreto actual",
+      "showSecret": "Mostrar secreto",
+      "hideSecret": "Ocultar secreto",
+      "algorithm": "Algoritmo",
+      "digits": "Dígitos",
+      "period": "Periodo (segundos)",
+      "errors": {
+        "secret": "El secreto debe tener entre 16 y 128 caracteres Base32 (A–Z, 2–7).",
+        "storedSecret": "El secreto guardado no genera ningún código. Introduzca un secreto nuevo para sustituirlo.",
+        "algorithm": "El algoritmo debe ser SHA1, SHA256 o SHA512.",
+        "digits": "Un código de un solo uso tiene de 6 a 8 dígitos.",
+        "period": "El periodo debe estar entre 15 y 120 segundos.",
+        "shape": "No se aceptó la configuración del código de un solo uso. Vuelva a cargar la entrada e inténtelo de nuevo.",
+        "entryType": "Este tipo de entrada no puede tener un código de un solo uso.",
+        "readRequired": "Necesita permiso de lectura sobre esta entrada para cambiar su código de un solo uso."
+      }
+    }
   },
   "folderForm": {
     "createTitle": "Nueva carpeta",

@@ -126,7 +126,18 @@
     "keyPass": "Schlüssel-Passphrase",
     "revealPassword": "Wert anzeigen",
     "hidePassword": "Wert verbergen",
-    "detailsTitle": "Eintragsdetails"
+    "detailsTitle": "Eintragsdetails",
+    "oneTimeCode": {
+      "label": "Einmalcode",
+      "show": "Code anzeigen",
+      "hide": "Code verbergen",
+      "hasCode": "Hat einen Einmalcode",
+      "secondsLeft": "noch {{seconds}} s",
+      "notAvailable": "Der Einmalcode ist für Sie nicht verfügbar.",
+      "none": "Dieser Eintrag hat keinen Einmalcode.",
+      "unsupported": "Für diesen Eintragstyp sind keine Einmalcodes verfügbar.",
+      "loadFailed": "Der Einmalcode konnte nicht geladen werden."
+    }
   },
   "document": {
     "downloadWarningTitle": "Vertrauliches Dokument herunterladen",
@@ -275,7 +286,46 @@
     "linkedNotice": "Login und Passwort dieses Eintrags sind mit einem anderen Eintrag verknüpft und können hier nicht bearbeitet werden.",
     "importanceLow": "Niedrig",
     "importanceNormal": "Normal",
-    "importanceHigh": "Hoch"
+    "importanceHigh": "Hoch",
+    "oneTimeCode": {
+      "title": "Einmalcode",
+      "add": "Einmalcode hinzufügen",
+      "replace": "Einmalcode ersetzen",
+      "remove": "Einmalcode entfernen",
+      "removeTitle": "Einmalcode entfernen",
+      "removeDesc": "Das Geheimnis wird beim Speichern vom Server gelöscht. Um den Code erneut einzurichten, ist ein neues Geheimnis des Dienstes erforderlich.",
+      "removePending": "Der Einmalcode wird beim Speichern entfernt.",
+      "keep": "Einmalcode behalten",
+      "discard": "Änderungen verwerfen",
+      "storedSummary": "{{algorithm}} · {{digits}} Stellen · alle {{period}} s",
+      "unknownAlgorithm": "unbekannter Algorithmus",
+      "invalidNotice": "Das gespeicherte Geheimnis erzeugt keinen Code. Ersetzen Sie es, um den Eintrag zu reparieren.",
+      "nonConformingNotice": "Die gespeicherten Einstellungen liegen außerhalb des zulässigen Bereichs (6 bis 8 Stellen, 15 bis 120 Sekunden). Beim Speichern werden sie in den Bereich gebracht.",
+      "paste": "Einrichtungslink oder Geheimnis",
+      "pastePlaceholder": "otpauth://totp/… oder das Geheimnis",
+      "pasteHint": "Fügen Sie den otpauth://-Link des Dienstes oder dessen Geheimnis ein. QR-Codes können hier noch nicht gescannt werden.",
+      "pasteInvalid": "Der eingefügte Link konnte nicht gelesen werden. Es werden nur otpauth://-Links für zeitbasierte Codes unterstützt.",
+      "filledFrom": "Aus dem Link für {{source}} übernommen.",
+      "filledFromLink": "Aus dem eingefügten Link übernommen.",
+      "secret": "Geheimnis",
+      "secretPlaceholderNew": "Base32-Geheimnis des Dienstes",
+      "secretPlaceholderKeep": "Leer lassen, um das aktuelle Geheimnis zu behalten",
+      "showSecret": "Geheimnis anzeigen",
+      "hideSecret": "Geheimnis verbergen",
+      "algorithm": "Algorithmus",
+      "digits": "Stellen",
+      "period": "Intervall (Sekunden)",
+      "errors": {
+        "secret": "Das Geheimnis muss aus 16 bis 128 Base32-Zeichen (A–Z, 2–7) bestehen.",
+        "storedSecret": "Das gespeicherte Geheimnis erzeugt keinen Code. Geben Sie ein neues Geheimnis ein, um es zu ersetzen.",
+        "algorithm": "Der Algorithmus muss SHA1, SHA256 oder SHA512 sein.",
+        "digits": "Ein Einmalcode hat 6 bis 8 Stellen.",
+        "period": "Das Intervall muss zwischen 15 und 120 Sekunden liegen.",
+        "shape": "Die Einstellungen des Einmalcodes wurden nicht übernommen. Laden Sie den Eintrag neu und versuchen Sie es erneut.",
+        "entryType": "Dieser Eintragstyp kann keinen Einmalcode enthalten.",
+        "readRequired": "Sie benötigen Leserechte für diesen Eintrag, um seinen Einmalcode zu ändern."
+      }
+    }
   },
   "folderForm": {
     "createTitle": "Neuer Ordner",

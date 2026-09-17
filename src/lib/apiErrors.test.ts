@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { TFunction } from 'i18next'
-import { describeApiError, describeLoginError } from './apiErrors'
+import { describeApiError, describeLoginError, describeOtpError } from './apiErrors'
 import { ApiError } from '@/api/client'
 
 // Test double for i18next's `t`. Returns the key so we can assert which
@@ -18,6 +18,21 @@ describe('describeLoginError', () => {
     [460, 460, 'Code sent', 'Code sent'],
   ])('status %i, code %i, message %j -> %j', (status, code, message, expected) => {
     expect(describeLoginError(new ApiError(status, code, message), t)).toBe(expected)
+  })
+})
+
+describe('describeOtpError', () => {
+  it.each([
+    [403, 4031, 'secondPassword.wrongPassword'],
+    [403, 403, 'entry.oneTimeCode.notAvailable'],
+    [403, 4099, 'entry.oneTimeCode.notAvailable'],
+    [404, 4041, 'entry.oneTimeCode.none'],
+    [404, 404, 'errors.notFound'],
+    [501, 501, 'entry.oneTimeCode.unsupported'],
+    [500, 500, 'entry.oneTimeCode.loadFailed'],
+    [400, 4031, 'entry.oneTimeCode.loadFailed'],
+  ])('status %i, code %i -> %j', (status, code, expected) => {
+    expect(describeOtpError(status, code, t)).toBe(expected)
   })
 })
 

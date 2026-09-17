@@ -126,7 +126,18 @@
     "keyPass": "Phrase secrète de la clé",
     "revealPassword": "Afficher la valeur",
     "hidePassword": "Masquer la valeur",
-    "detailsTitle": "Détails de l'entrée"
+    "detailsTitle": "Détails de l'entrée",
+    "oneTimeCode": {
+      "label": "Code à usage unique",
+      "show": "Afficher le code",
+      "hide": "Masquer le code",
+      "hasCode": "Possède un code à usage unique",
+      "secondsLeft": "{{seconds}} s restantes",
+      "notAvailable": "Le code à usage unique n'est pas disponible pour vous.",
+      "none": "Cette entrée n'a pas de code à usage unique.",
+      "unsupported": "Les codes à usage unique ne sont pas disponibles pour ce type d'entrée.",
+      "loadFailed": "Le code à usage unique n'a pas pu être chargé."
+    }
   },
   "document": {
     "downloadWarningTitle": "Télécharger un document confidentiel",
@@ -275,7 +286,46 @@
     "linkedNotice": "L'identifiant et le mot de passe de cette entrée sont liés à une autre entrée et ne peuvent pas être modifiés ici.",
     "importanceLow": "Faible",
     "importanceNormal": "Normale",
-    "importanceHigh": "Élevée"
+    "importanceHigh": "Élevée",
+    "oneTimeCode": {
+      "title": "Code à usage unique",
+      "add": "Ajouter un code à usage unique",
+      "replace": "Remplacer le code à usage unique",
+      "remove": "Supprimer le code à usage unique",
+      "removeTitle": "Supprimer le code à usage unique",
+      "removeDesc": "Le secret est supprimé du serveur lors de l'enregistrement. Pour configurer à nouveau le code, un nouveau secret du service est nécessaire.",
+      "removePending": "Le code à usage unique sera supprimé lors de l'enregistrement.",
+      "keep": "Conserver le code à usage unique",
+      "discard": "Annuler les modifications",
+      "storedSummary": "{{algorithm}} · {{digits}} chiffres · toutes les {{period}} s",
+      "unknownAlgorithm": "algorithme inconnu",
+      "invalidNotice": "Le secret enregistré ne produit aucun code. Remplacez-le pour réparer l'entrée.",
+      "nonConformingNotice": "Les paramètres enregistrés sont hors de la plage acceptée (6 à 8 chiffres, 15 à 120 secondes). L'enregistrement les ramène dans la plage.",
+      "paste": "Lien de configuration ou secret",
+      "pastePlaceholder": "otpauth://totp/… ou le secret",
+      "pasteHint": "Collez le lien otpauth:// du service, ou son secret. Les codes QR ne peuvent pas encore être scannés ici.",
+      "pasteInvalid": "Le lien collé n'a pas pu être lu. Seuls les liens otpauth:// pour les codes basés sur le temps sont pris en charge.",
+      "filledFrom": "Rempli à partir du lien pour {{source}}.",
+      "filledFromLink": "Rempli à partir du lien collé.",
+      "secret": "Secret",
+      "secretPlaceholderNew": "Secret Base32 du service",
+      "secretPlaceholderKeep": "Laisser vide pour conserver le secret actuel",
+      "showSecret": "Afficher le secret",
+      "hideSecret": "Masquer le secret",
+      "algorithm": "Algorithme",
+      "digits": "Chiffres",
+      "period": "Période (secondes)",
+      "errors": {
+        "secret": "Le secret doit comporter de 16 à 128 caractères Base32 (A–Z, 2–7).",
+        "storedSecret": "Le secret enregistré ne produit aucun code. Saisissez un nouveau secret pour le remplacer.",
+        "algorithm": "L'algorithme doit être SHA1, SHA256 ou SHA512.",
+        "digits": "Un code à usage unique comporte de 6 à 8 chiffres.",
+        "period": "La période doit être comprise entre 15 et 120 secondes.",
+        "shape": "Les paramètres du code à usage unique n'ont pas été acceptés. Rechargez l'entrée et réessayez.",
+        "entryType": "Ce type d'entrée ne peut pas contenir de code à usage unique.",
+        "readRequired": "Vous devez disposer du droit de lecture sur cette entrée pour modifier son code à usage unique."
+      }
+    }
   },
   "folderForm": {
     "createTitle": "Nouveau dossier",

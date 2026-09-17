@@ -126,7 +126,18 @@
     "keyPass": "Wachtwoordzin van de sleutel",
     "revealPassword": "Waarde tonen",
     "hidePassword": "Waarde verbergen",
-    "detailsTitle": "Itemdetails"
+    "detailsTitle": "Itemdetails",
+    "oneTimeCode": {
+      "label": "Eenmalige code",
+      "show": "Code tonen",
+      "hide": "Code verbergen",
+      "hasCode": "Heeft een eenmalige code",
+      "secondsLeft": "nog {{seconds}} s",
+      "notAvailable": "De eenmalige code is niet voor u beschikbaar.",
+      "none": "Dit item heeft geen eenmalige code.",
+      "unsupported": "Eenmalige codes zijn niet beschikbaar voor dit itemtype.",
+      "loadFailed": "De eenmalige code kon niet worden geladen."
+    }
   },
   "document": {
     "downloadWarningTitle": "Vertrouwelijk document downloaden",
@@ -275,7 +286,46 @@
     "linkedNotice": "De login en het wachtwoord van dit item zijn gekoppeld aan een ander item en kunnen hier niet worden bewerkt.",
     "importanceLow": "Laag",
     "importanceNormal": "Normaal",
-    "importanceHigh": "Hoog"
+    "importanceHigh": "Hoog",
+    "oneTimeCode": {
+      "title": "Eenmalige code",
+      "add": "Eenmalige code toevoegen",
+      "replace": "Eenmalige code vervangen",
+      "remove": "Eenmalige code verwijderen",
+      "removeTitle": "Eenmalige code verwijderen",
+      "removeDesc": "Het geheim wordt bij het opslaan van de server verwijderd. Om de code opnieuw in te stellen is een nieuw geheim van de dienst nodig.",
+      "removePending": "De eenmalige code wordt bij het opslaan verwijderd.",
+      "keep": "Eenmalige code behouden",
+      "discard": "Wijzigingen verwerpen",
+      "storedSummary": "{{algorithm}} · {{digits}} cijfers · elke {{period}} s",
+      "unknownAlgorithm": "onbekend algoritme",
+      "invalidNotice": "Het opgeslagen geheim levert geen code op. Vervang het om het item te herstellen.",
+      "nonConformingNotice": "De opgeslagen instellingen vallen buiten het toegestane bereik (6 tot 8 cijfers, 15 tot 120 seconden). Bij het opslaan worden ze binnen het bereik gebracht.",
+      "paste": "Instellingslink of geheim",
+      "pastePlaceholder": "otpauth://totp/… of het geheim",
+      "pasteHint": "Plak de otpauth://-link van de dienst of het geheim ervan. QR-codes kunnen hier nog niet worden gescand.",
+      "pasteInvalid": "De geplakte link kon niet worden gelezen. Alleen otpauth://-links voor tijdgebaseerde codes worden ondersteund.",
+      "filledFrom": "Overgenomen uit de link voor {{source}}.",
+      "filledFromLink": "Overgenomen uit de geplakte link.",
+      "secret": "Geheim",
+      "secretPlaceholderNew": "Base32-geheim van de dienst",
+      "secretPlaceholderKeep": "Leeg laten om het huidige geheim te behouden",
+      "showSecret": "Geheim tonen",
+      "hideSecret": "Geheim verbergen",
+      "algorithm": "Algoritme",
+      "digits": "Cijfers",
+      "period": "Interval (seconden)",
+      "errors": {
+        "secret": "Het geheim moet uit 16 tot 128 Base32-tekens (A–Z, 2–7) bestaan.",
+        "storedSecret": "Het opgeslagen geheim levert geen code op. Voer een nieuw geheim in om het te vervangen.",
+        "algorithm": "Het algoritme moet SHA1, SHA256 of SHA512 zijn.",
+        "digits": "Een eenmalige code heeft 6 tot 8 cijfers.",
+        "period": "Het interval moet tussen 15 en 120 seconden liggen.",
+        "shape": "De instellingen van de eenmalige code zijn niet geaccepteerd. Laad het item opnieuw en probeer het nog eens.",
+        "entryType": "Dit itemtype kan geen eenmalige code bevatten.",
+        "readRequired": "U hebt leesrechten op dit item nodig om de eenmalige code te wijzigen."
+      }
+    }
   },
   "folderForm": {
     "createTitle": "Nieuwe map",

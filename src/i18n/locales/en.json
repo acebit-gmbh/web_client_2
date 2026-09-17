@@ -126,7 +126,18 @@
     "keyPass": "Key Passphrase",
     "revealPassword": "Reveal value",
     "hidePassword": "Hide value",
-    "detailsTitle": "Entry Details"
+    "detailsTitle": "Entry Details",
+    "oneTimeCode": {
+      "label": "One-Time Code",
+      "show": "Show code",
+      "hide": "Hide code",
+      "hasCode": "Has a one-time code",
+      "secondsLeft": "{{seconds}} s left",
+      "notAvailable": "The one-time code is not available for you.",
+      "none": "This entry has no one-time code.",
+      "unsupported": "One-time codes are not available for this entry type.",
+      "loadFailed": "The one-time code could not be loaded."
+    }
   },
   "document": {
     "downloadWarningTitle": "Download Confidential Document",
@@ -275,7 +286,46 @@
     "linkedNotice": "This entry's login and password are linked from another entry and cannot be edited here.",
     "importanceLow": "Low",
     "importanceNormal": "Normal",
-    "importanceHigh": "High"
+    "importanceHigh": "High",
+    "oneTimeCode": {
+      "title": "One-Time Code",
+      "add": "Add one-time code",
+      "replace": "Replace one-time code",
+      "remove": "Remove one-time code",
+      "removeTitle": "Remove One-Time Code",
+      "removeDesc": "The secret is deleted from the server when you save. To set up the code again, a new secret from the service is required.",
+      "removePending": "The one-time code will be removed when you save.",
+      "keep": "Keep one-time code",
+      "discard": "Discard changes",
+      "storedSummary": "{{algorithm}} · {{digits}} digits · every {{period}} s",
+      "unknownAlgorithm": "unknown algorithm",
+      "invalidNotice": "The stored secret does not produce a code. Replace it to repair the entry.",
+      "nonConformingNotice": "The stored settings are outside the accepted range (6 to 8 digits, 15 to 120 seconds). Saving forces them into range.",
+      "paste": "Setup link or secret",
+      "pastePlaceholder": "otpauth://totp/… or the secret",
+      "pasteHint": "Paste the otpauth:// link from the service, or its secret. QR codes cannot be scanned here yet.",
+      "pasteInvalid": "The pasted link could not be read. Only otpauth:// links for time-based codes are supported.",
+      "filledFrom": "Filled from the link for {{source}}.",
+      "filledFromLink": "Filled from the pasted link.",
+      "secret": "Secret",
+      "secretPlaceholderNew": "Base32 secret from the service",
+      "secretPlaceholderKeep": "Leave empty to keep the current secret",
+      "showSecret": "Show secret",
+      "hideSecret": "Hide secret",
+      "algorithm": "Algorithm",
+      "digits": "Digits",
+      "period": "Period (seconds)",
+      "errors": {
+        "secret": "The secret must be 16 to 128 Base32 characters (A–Z, 2–7).",
+        "storedSecret": "The stored secret does not produce a code. Enter a new secret to replace it.",
+        "algorithm": "The algorithm must be SHA1, SHA256 or SHA512.",
+        "digits": "A one-time code has 6 to 8 digits.",
+        "period": "The period must be 15 to 120 seconds.",
+        "shape": "The one-time code settings were not accepted. Reload the entry and try again.",
+        "entryType": "This entry type cannot carry a one-time code.",
+        "readRequired": "You need read permission on this entry to change its one-time code."
+      }
+    }
   },
   "folderForm": {
     "createTitle": "New Folder",
