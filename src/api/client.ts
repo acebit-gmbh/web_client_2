@@ -54,6 +54,27 @@ export function notifyApiAuthFailure(): void {
 interface RequestOptions extends RequestInit {
   skipAuth?: boolean
   secondPassword?: string
+  /**
+   * Do not count a successful answer as user activity. For requests the app
+   * fires on its own in the background (database-icon images): a long queue
+   * of them must not keep resetting the session watchdog after the user has
+   * stopped working. 401 handling and error parsing are unchanged.
+   */
+  skipActivity?: boolean
+}
+
+/**
+ * An upload that never got an HTTP answer (XHR `error` event: connection
+ * lost, TLS or CORS failure, or a server that closed the connection before
+ * answering). fetch() reports the same situation as a TypeError; XHR has no
+ * typed equivalent, so this class is the marker. It carries no user-facing
+ * text - the UI maps the class to a localized message (describeApiError).
+ */
+export class UploadInterruptedError extends Error {
+  constructor() {
+    super('Upload interrupted')
+    this.name = 'UploadInterruptedError'
+  }
 }
 
 export class ApiError extends Error {
@@ -69,7 +90,13 @@ export class ApiError extends Error {
 }
 
 export async function apiClient<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { skipAuth = false, secondPassword, headers: customHeaders, ...fetchOptions } = options
+  const {
+    skipAuth = false,
+    skipActivity = false,
+    secondPassword,
+    headers: customHeaders,
+    ...fetchOptions
+  } = options
 
   const headers = new Headers(customHeaders)
 
@@ -99,8 +126,9 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
     headers,
   })
 
-  // Reset session watchdog on any successful API call
-  if (response.ok) {
+  // Reset session watchdog on any successful API call (unless the caller
+  // marked the request as background traffic)
+  if (response.ok && !skipActivity) {
     notifyApiActivity()
   }
 

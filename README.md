@@ -16,6 +16,7 @@ The web client provides browser-based access to Password Depot vaults with suppo
 - **6 authentication methods** -- Standard, SSPI, Windows SSO (Negotiate), Passkey (WebAuthn), OIDC, Azure AD
 - **Two-factor authentication** -- TOTP setup and verification
 - **Second password protection** -- per-entry/folder unlock with session caching
+- **Database icons** -- shows the custom icons stored in a database on its entries and folders, falling back to the standard icon; the entry form has an icon picker (the 135 standard icons, the icons of the database, or a new image that is scaled to 64 × 64 pixels in the browser and uploaded) (Server 20.0.0+)
 - **One-time codes** -- shows an entry's current TOTP code on request, with countdown and 20-second clipboard auto-clear; the entry form sets, replaces or removes the secret (typed, or pasted as an `otpauth://` link) for password, credit card, license, banking and custom entries (Server 20.0.0+)
 - **Session management** -- 10-minute inactivity timeout with warning, auto-logout
 - **Responsive design** -- desktop, tablet, and mobile layouts
@@ -40,7 +41,7 @@ The web client provides browser-based access to Password Depot vaults with suppo
 
 - **Node.js** 20 or later
 - **npm** 10 or later (ships with Node.js 20+)
-- **Password Depot Enterprise Server** 19.x running with REST API v2.0 enabled (20.0.0 or later for one-time codes)
+- **Password Depot Enterprise Server** 19.x running with REST API v2.0 enabled (20.0.0 or later for one-time codes and database icons)
 
 ## Getting Started
 
@@ -60,7 +61,7 @@ cp .env.example .env.local
 #   DEV_PROXY_TARGET=https://your-pd-server:8714
 ```
 
-`npm run dev` forwards the `/v2.0`, `/file`, and `/temp` routes to `DEV_PROXY_TARGET` (defaults to `https://localhost:8714` when unset). The `/file` route serves entry icons in development — it must be proxied or custom icons will 404.
+`npm run dev` forwards the `/v2.0`, `/file`, and `/temp` routes to `DEV_PROXY_TARGET` (defaults to `https://localhost:8714` when unset). The `/file` route serves the legacy icon files of servers older than 20.0.0 in development — it must be proxied or those icons will 404. (Standard icons are bundled with the client, and database icons of Server 20.0.0+ arrive through `/v2.0`.)
 
 `.env.local` is gitignored, and `DEV_PROXY_TARGET` is **not** `VITE_`-prefixed, so it never reaches the client bundle. The dev proxy accepts the server's self-signed/private TLS certificate (`secure: false` in `vite.config.ts`); the production client always uses HTTPS against a properly-presented certificate.
 
@@ -283,7 +284,7 @@ The full original login request (including OIDC/Azure tokens) is preserved and r
 - **Second password** -- entries and folders protected with a second password require an additional password prompt. The second password is sent via the `X-Second-Password` header (Base64-encoded) and cached in memory for the session duration.
 - **OIDC / Azure callback validation** -- the OAuth `state` and `nonce` values are generated with `crypto.getRandomValues`. On callback the `state` is verified against the value saved during the authorization request, and when the IdP returns an `id_token` directly its `nonce` claim is verified before the token is forwarded to the PD Server. Error callbacks are only honored when an OIDC flow is actually in progress, and only the machine-readable error code (never the IdP's free-text description) is shown, to prevent text-injection via crafted `?error=` links.
 - **No-store responses** -- API requests are issued with `cache: 'no-store'` so entry-detail responses (which contain plaintext passwords) are never written to the browser's persistent disk cache.
-- **Content-Security-Policy** -- `index.html` ships a baseline CSP meta tag (`object-src 'none'`, `frame-ancestors 'none'`, scoped `connect-src`, etc.). For standalone/cloud deployments, **also serve a stricter nonce/hash-based CSP as a real HTTP header** at your web server (a meta tag cannot set `frame-ancestors`, and a static tag can't carry a per-build nonce), and tighten `connect-src` to your specific PD Server origin.
+- **Content-Security-Policy** -- `index.html` ships a baseline CSP meta tag (`object-src 'none'`, `frame-ancestors 'none'`, scoped `connect-src`, etc.). For standalone/cloud deployments, **also serve a stricter nonce/hash-based CSP as a real HTTP header** at your web server (a meta tag cannot set `frame-ancestors`, and a static tag can't carry a per-build nonce), and tighten `connect-src` to your specific PD Server origin. Database icons need **no CSP change**: the server sends them as base64 inside JSON and the client displays them as `data:` URLs, which `img-src 'self' data: https:` already allows. Do **not** add `blob:` to `img-src` for them — the client never creates object URLs for display, and the image type is allow-listed to PNG and BMP (SVG is never rendered from server data). The icon upload needs nothing either: the chosen file is decoded with `createImageBitmap` (which is not subject to `img-src`), drawn on a canvas, and both its preview and the uploaded PNG come from that canvas as a `data:` URL / base64 — again no `blob:`. SVG files are not accepted as an upload source.
 
 ## Project Structure
 
@@ -296,6 +297,7 @@ src/
     database/       Database selector
     entries/        Entry list, detail views (12 types), entry form
     folders/        Folder form, folder picker
+    icons/          Database icon image (first link of the icon fallback chain), icon picker and upload
     layout/         AppBar, breadcrumbs, status bar, vault shell
     profile/        User profile panel, change password
     search/         Search results
@@ -345,6 +347,10 @@ Full API documentation: **https://github.com/acebit-gmbh/pd_rest_api** (also pub
 | DELETE | `/databases/{db}/folders/{id}` | Delete folder |
 | POST | `/databases/{db}/folders/{id}/move` | Move folder |
 | GET | `/databases/{db}/search` | Search entries |
+| GET | `/databases/{db}/icons` | Icons stored in the database: `id`, `name`, `version` (Server 20.0.0+) |
+| GET | `/databases/{db}/icons?ids=…&include=data` | Database icon images, batched (Server 20.0.0+) |
+| GET | `/databases/{db}/icons/{id}` | One database icon image (Server 20.0.0+) |
+| POST | `/databases/{db}/icons` | Upload a database icon: JSON `{name, data}` with a base64 PNG (Server 20.0.0+) |
 
 ### API Constraints
 
@@ -353,6 +359,8 @@ Full API documentation: **https://github.com/acebit-gmbh/pd_rest_api** (also pub
 - **Compact vs. full representations** -- list endpoints return compact objects (no passwords); detail endpoints return full objects
 - **Pagination** -- all list endpoints support `offset` and `limit` query parameters
 - **One-time codes on request only** -- `/otp` is an audited read that fires "password accessed" alerts, so the client fetches a code only when the user clicks *Show code*, never on a timer or on tab focus. Codes are never computed client-side; the seed stays on the server. Entries carry `has_otp` (and `totp`) only on Server 20.0.0+, so their absence means the feature is unavailable.
+- **Database icons are JSON, batched, and cached by version** -- on Server 20.0.0+ a row's `database_icon` (`id`, `name`, `version`) points at an icon of the row's own database. There is no image URL: the image arrives as base64 inside JSON, is requested for all rows of a listing at once (`?ids=` in chunks of `icons.batch_max`, at most three requests in flight; a `deferred` item is fetched with the single-icon route) and is cached in memory per (database, id, version) - never refetched while in use, dropped after 30 unused minutes and on logout. The display chain is database icon → bundled standard icon named by `icon` → type glyph; an unusable or missing icon is remembered and the fallback shown. Support is detected by the `icons` object on the database — without it the client never calls `/icons`, and rows without a `database_icon` never trigger a request.
+- **Icon changes travel only when made, uploads are always 64 × 64 PNG** -- the entry form (entries only; folders just display their icon) sends `image_custom` / `image_index` / `image_name` only when the user changed the icon, in one of three forms: `{image_custom: true, image_name}` for an icon of the database (never a client-computed position), `{image_custom: false, image_index: 0..134}` for a standard icon, `{image_custom: false, image_index: -1}` for the type default. The picker labels the standard icons 1..135 for the user, so *Standard icon 13* in the UI is `image_index: 12` on the wire and in the server's audit record — an offset of one when a support case names an icon. An upload is a request of its own, made before the entry is saved: the picked PNG/JPEG/GIF/WebP/BMP file (never SVG) is drawn contain-fit on a transparent 64 × 64 canvas — the native size of a Password Depot icon; there is no ladder of smaller sizes — and refused locally if the PNG exceeds `icons.max_bytes`. The entry is then saved with the `name` **the server answered** (a different picture under a taken name is stored as `name (2)`). REST has no icon delete, so an upload is not rolled back when the entry save fails; the icon stays selected for the retry. The *Upload* tab exists only while `icons.can_upload` is true, the whole picker only while the database carries `icons`. Refusals are explained inline by (status, `error.code`): 400/4007 (the chosen icon no longer exists — the list is re-read and the picker reopened), 400/4008, 403/4034, 413/4131, a plain 403 (mirror server); an upload that fails without any HTTP answer is reported as "too large or connection lost", because the server's header-stage 413 carries no CORS headers.
 - **One-time code secrets are write-only** -- no route ever returns a stored seed, so the entry form shows only the stored parameters and a *Replace* means typing or pasting a whole new secret. The `totp` request key is sent only when the server has shown it accepts it (the loaded entry, or any listed entry of the database, carries `totp`); it is omitted when untouched, `null` to remove, and carries all four members whenever a secret is sent. Unknown request keys are ignored by older servers, so the client never probes by writing.
 
 ## Contributing

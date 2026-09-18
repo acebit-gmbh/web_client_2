@@ -15,8 +15,9 @@ import {
   Folder,
   type LucideIcon,
 } from 'lucide-react'
-import type { EntryType } from '@/api/types'
+import type { DatabaseIconRef, EntryType } from '@/api/types'
 import { getIconUrl } from '@/lib/icons'
+import { DatabaseIconImage } from '@/components/icons/DatabaseIconImage'
 
 const ENTRY_TYPE_ICONS: Record<EntryType | 'folder', { icon: LucideIcon; color: string }> = {
   password: { icon: Key, color: 'text-amber-600' },
@@ -36,12 +37,47 @@ const ENTRY_TYPE_ICONS: Record<EntryType | 'folder', { icon: LucideIcon; color: 
 
 interface EntryIconProps {
   type: EntryType | 'folder'
-  /** Icon filename from the server (e.g. "ico12.svg", "favicon_github.png") */
+  /** Standard icon file name from the server (e.g. "ico12.svg"; older servers may send other names) */
   icon?: string
+  /**
+   * The row's `database_icon` (Server 20.0.0+): the item's icon in its own
+   * database. Shown first; `icon` is then the fallback.
+   */
+  databaseIcon?: DatabaseIconRef | null
+  /** Database the item belongs to; defaults to the one the vault is showing. */
+  dbId?: string | null
   className?: string
 }
 
-export function EntryIcon({ type, icon, className = 'h-5 w-5' }: EntryIconProps) {
+/**
+ * The icon chain: database icon -> bundled standard icon named by `icon` ->
+ * Lucide glyph of the entry type.
+ *
+ * The database-icon part is a separate component mounted only when the row
+ * has one: it subscribes to a query, and the (non-virtualised) entry list
+ * must not carry an idle observer for every plain row.
+ */
+export function EntryIcon({
+  type,
+  icon,
+  databaseIcon,
+  dbId,
+  className = 'h-5 w-5',
+}: EntryIconProps) {
+  const standard = <StandardEntryIcon type={type} icon={icon} className={className} />
+  if (!databaseIcon) return standard
+  return (
+    <DatabaseIconImage icon={databaseIcon} dbId={dbId} className={className} fallback={standard} />
+  )
+}
+
+interface StandardEntryIconProps {
+  type: EntryType | 'folder'
+  icon?: string
+  className: string
+}
+
+function StandardEntryIcon({ type, icon, className }: StandardEntryIconProps) {
   // Track the URL that failed to load, not just a boolean. EntryIcon instances
   // are reused across entry selection, so a stale boolean would force the
   // generic fallback for every subsequently selected entry. Comparing against

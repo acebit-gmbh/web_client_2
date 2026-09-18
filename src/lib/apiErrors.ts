@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next'
-import { ApiError } from '@/api/client'
+import { ApiError, UploadInterruptedError } from '@/api/client'
+import { IconUploadAnswerError } from '@/api/icons'
 import type { TotpField } from '@/lib/totp'
 
 /**
@@ -16,7 +17,10 @@ import type { TotpField } from '@/lib/totp'
  * Network-layer failures (`fetch()` throwing TypeError) become a single
  * "check your connection / certificate" message — browsers do not expose
  * enough detail to differentiate offline / DNS / CORS / TLS reliably, so
- * grouping them is more honest than a misleading specific message.
+ * grouping them is more honest than a misleading specific message. An XHR
+ * upload that dies the same way is an UploadInterruptedError and gets its
+ * own wording: the server was reachable a moment ago (the entry was just
+ * created), so "could not reach the server" would mislead.
  */
 export function describeApiError(err: unknown, t: TFunction): string {
   if (err instanceof ApiError) {
@@ -25,6 +29,9 @@ export function describeApiError(err: unknown, t: TFunction): string {
   }
   if (err instanceof TypeError) {
     return t('errors.network')
+  }
+  if (err instanceof UploadInterruptedError) {
+    return t('errors.uploadInterrupted')
   }
   if (err instanceof Error) {
     return err.message || t('errors.unknown')
@@ -143,6 +150,98 @@ export function isTotpWriteRefusal(err: unknown): boolean {
   if (err.status === 400)
     return err.code >= ERRCODE_TOTP_SECRET && err.code <= ERRCODE_TOTP_ENTRY_TYPE
   return err.status === 403 && err.code === ERRCODE_TOTP_READ_REQUIRED
+}
+
+/**
+ * PD Server 20+: database-icon sub-codes. Each is only ever sent with its own
+ * status, so every check below pairs the two.
+ */
+/** HTTP 400 on an entry write: `image_*` do not name a usable icon; nothing was written. */
+export const ERRCODE_ICON_ASSIGNMENT = 4007
+/** HTTP 400 on an icon upload: `data` is not a usable PNG. */
+export const ERRCODE_ICON_IMAGE = 4008
+/** HTTP 403 on an icon upload: the database's slot or byte quota is reached. */
+export const ERRCODE_ICON_QUOTA = 4034
+/** HTTP 404 on an icon read: no usable icon with that id in this database. */
+export const ERRCODE_ICON_NOT_FOUND = 4042
+/** HTTP 413 on an icon upload: bytes, pixels or the stored record are over the limit. */
+export const ERRCODE_ICON_TOO_LARGE = 4131
+
+/**
+ * Message for a refusal that is about a database icon, or null when the
+ * error is not one (the caller falls back to its usual handling). Status
+ * first, then code, never the server's message: the wording must be the
+ * browser's language, as for the one-time-code refusals.
+ *
+ * A 413 is "too large" whatever its code: besides 413/4131 there is the
+ * plain 413 of the server's header stage, which a same-origin deployment
+ * gets to see (cross-origin it has no CORS headers - see
+ * describeIconUploadError).
+ */
+export function describeIconError(status: number, code: number, t: TFunction): string | null {
+  if (status === 413) return t('entryForm.icon.errors.tooLarge')
+  if (status === 400) {
+    if (code === ERRCODE_ICON_ASSIGNMENT) return t('entryForm.icon.errors.gone')
+    if (code === ERRCODE_ICON_IMAGE) return t('entryForm.icon.errors.image')
+    return null
+  }
+  if (status === 403 && code === ERRCODE_ICON_QUOTA) return t('entryForm.icon.errors.quota')
+  if (status === 404 && code === ERRCODE_ICON_NOT_FOUND) return t('entryForm.icon.errors.gone')
+  return null
+}
+
+/**
+ * True for an error the entry form (or the icon picker) explains inline
+ * itself, so the generic toast stays away (see describeIconError). On an
+ * entry write that is 400/4007; the other pairs belong to the icon routes
+ * and are listed so the two functions cannot drift apart.
+ */
+export function isIconRefusal(err: unknown): boolean {
+  if (!(err instanceof ApiError)) return false
+  switch (err.status) {
+    case 400:
+      return err.code === ERRCODE_ICON_ASSIGNMENT || err.code === ERRCODE_ICON_IMAGE
+    case 403:
+      return err.code === ERRCODE_ICON_QUOTA
+    case 404:
+      return err.code === ERRCODE_ICON_NOT_FOUND
+    case 413:
+      return err.code === ERRCODE_ICON_TOO_LARGE
+    default:
+      return false
+  }
+}
+
+/**
+ * Message for a failed icon upload - always one, the picker shows it inline.
+ *
+ * A `fetch()` TypeError gets its own wording here: a request body the
+ * server's header stage refuses (HTTP 413) is answered WITHOUT CORS headers
+ * and the connection is closed, so a cross-origin browser reports exactly
+ * what it reports for a lost connection. The client keeps its uploads far
+ * below that limit, so "too large or connection lost" is the honest hint.
+ *
+ * A plain 403 is the mirror refusal (a mirror server answers every write
+ * with it) or a missing upload right; a plain 400 means the name or the
+ * body was not accepted - the name is the only part the user typed.
+ */
+export function describeIconUploadError(err: unknown, t: TFunction): string {
+  // The upload itself succeeded; only the answer was unusable. Saying "could
+  // not be uploaded" would be false - the icon is in the database and counts
+  // against the quota - so this one gets its own wording.
+  if (err instanceof IconUploadAnswerError) return t('entryForm.icon.errors.uploadAnswer')
+  if (err instanceof ApiError) {
+    const specific = describeIconError(err.status, err.code, t)
+    if (specific) return specific
+    if (err.status === 400) return t('entryForm.icon.errors.nameRefused')
+    if (err.status === 401) return t('errors.sessionExpired')
+    if (err.status === 403) return t('entryForm.icon.errors.readOnly')
+    if (err.status === 429) return t('errors.rateLimit')
+    if (err.status >= 500) return t('errors.serverError')
+    return t('entryForm.icon.errors.uploadFailed')
+  }
+  if (err instanceof TypeError) return t('entryForm.icon.errors.tooLargeOrConnection')
+  return t('entryForm.icon.errors.uploadFailed')
 }
 
 function defaultMessageForStatus(status: number, t: TFunction): string {

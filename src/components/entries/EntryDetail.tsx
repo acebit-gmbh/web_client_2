@@ -129,7 +129,13 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
       <div className="p-4 lg:flex-1">
         {/* Header — large icon + name + type */}
         <div className="mb-4 flex items-start gap-3">
-          <EntryIcon type={compactEntry.type} icon={compactEntry.icon} className="h-10 w-10" />
+          <EntryIcon
+            type={compactEntry.type}
+            icon={compactEntry.icon}
+            databaseIcon={compactEntry.database_icon}
+            dbId={dbId}
+            className="h-10 w-10"
+          />
           <div className="min-w-0 flex-1">
             <h2 className="text-lg font-semibold leading-tight">{compactEntry.name}</h2>
             <p className="text-sm text-muted-foreground">{typeName}</p>

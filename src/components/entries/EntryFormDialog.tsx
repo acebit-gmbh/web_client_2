@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { Loader2, Wand2 } from 'lucide-react'
 import {
   Dialog,
@@ -14,9 +15,23 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PasswordGenerator } from '@/components/common/PasswordGenerator'
 import { TotpSection } from './TotpSection'
+import { IconPicker, type IconPickerHandle } from '@/components/icons/IconPicker'
 import { useTotpCapability } from '@/hooks/useTotpCapability'
+import { useIconCapability } from '@/hooks/useIconCapability'
 import { ApiError } from '@/api/client'
-import { describeTotpWriteError, totpRefusedField } from '@/lib/apiErrors'
+import {
+  describeIconError,
+  describeTotpWriteError,
+  ERRCODE_ICON_ASSIGNMENT,
+  isIconRefusal,
+  totpRefusedField,
+} from '@/lib/apiErrors'
+import {
+  buildIconWrite,
+  ICON_UNCHANGED,
+  storedIconSelection,
+  type IconChoice,
+} from '@/lib/iconChoice'
 import {
   buildTotpWrite,
   isTotpWritableType,
@@ -52,9 +67,10 @@ interface EntryFormDialogProps {
   /** Pre-selected type for new entries */
   defaultType?: EntryType
   /**
-   * Database the entry lives in. Only the create form needs it, to learn
-   * from the database's cached listings whether the server accepts
-   * one-time-code settings (see useTotpCapability).
+   * Database the entry lives in. The create form needs it to learn from the
+   * database's cached listings whether the server accepts one-time-code
+   * settings (see useTotpCapability); create and edit need it for the icon
+   * picker - the database's `icons` capability, its icons, the upload target.
    */
   dbId?: string | null
   /** Called with the form data */
@@ -131,10 +147,23 @@ export function EntryFormDialog({
     setTotpInvalid(null)
   }
 
+  // Icon (Server 20.0.0+). The picker is invisible unless the database carries
+  // the `icons` capability: an older server stores `image_*` unchecked, so
+  // nothing icon-related is offered or sent there. Same payload rule as the
+  // one-time code - the keys travel only when the user changed the icon.
+  const queryClient = useQueryClient()
+  const iconCapability = useIconCapability(dbId)
+  const showIconPicker = !!dbId && iconCapability !== undefined
+  const [iconChoice, setIconChoice] = useState<IconChoice>(ICON_UNCHANGED)
+  const iconPickerRef = useRef<IconPickerHandle>(null)
+
   // The secret must not outlive the dialog: drop the editing state on every
   // way out (the parents also unmount the dialog, this makes it explicit).
+  // The icon choice goes with it - carried into the next entry it would be a
+  // silent wrong write, not a refusal, since the name is valid in this database.
   function handleClose() {
     setTotp(TOTP_UNTOUCHED)
+    setIconChoice(ICON_UNCHANGED)
     onClose()
   }
 
@@ -148,6 +177,14 @@ export function EntryFormDialog({
         setError(t('entryForm.invalidValidThru'))
         return
       }
+    }
+
+    // An image that was chosen but not uploaded would be dropped without a
+    // word: the upload is a step of its own and has to come first.
+    if (showIconPicker && iconPickerRef.current?.hasPendingUpload()) {
+      setError(t('entryForm.icon.errors.pendingUpload'))
+      iconPickerRef.current.open('upload')
+      return
     }
 
     // `totp` is built explicitly, never through clearable(): untouched omits
@@ -235,6 +272,14 @@ export function EntryFormDialog({
       base.totp = totpWrite
     }
 
+    // The icon keys: none while the icon is untouched, otherwise exactly one
+    // of the three documented forms (database icon by name / standard icon
+    // by number / type default). Never a position for a database icon - the
+    // server owns it.
+    if (showIconPicker) {
+      Object.assign(base, buildIconWrite(iconChoice))
+    }
+
     try {
       await onSubmit(base)
       handleClose()
@@ -254,6 +299,21 @@ export function EntryFormDialog({
         if (message) {
           setTotpInvalid(totpRefusedField(err.status, err.code))
           setError(message)
+        } else if (isIconRefusal(err)) {
+          // 400/4007: the chosen icon is not (or no longer) usable, and
+          // nothing was written. Same division of labour as above - the toast
+          // skips it, this form explains it. The refused choice is dropped,
+          // the icon list re-read (the rows too: their icons may be what
+          // changed) and the picker reopened for another pick. An icon that
+          // was uploaded for this save stays in the database; there is no
+          // REST delete, and none is needed.
+          setError(describeIconError(err.status, err.code, t))
+          if (err.code === ERRCODE_ICON_ASSIGNMENT && dbId) {
+            setIconChoice(ICON_UNCHANGED)
+            void queryClient.invalidateQueries({ queryKey: ['db-icons', dbId] })
+            void queryClient.invalidateQueries({ queryKey: ['children', dbId] })
+            iconPickerRef.current?.open('database')
+          }
         }
       }
     }
@@ -288,6 +348,22 @@ export function EntryFormDialog({
               data-lpignore="true"
             />
           </div>
+
+          {/* Icon (Server 20.0.0+) — only when the database reports the capability */}
+          {showIconPicker && (
+            <IconPicker
+              ref={iconPickerRef}
+              dbId={dbId}
+              capability={iconCapability}
+              entryType={type}
+              stored={storedIconSelection(entry)}
+              storedIconFile={entry?.icon}
+              value={iconChoice}
+              onChange={setIconChoice}
+              entryUrl={type === 'password' || type === 'custom' ? url : entry?.url}
+              disabled={isSubmitting}
+            />
+          )}
 
           <Separator />
 

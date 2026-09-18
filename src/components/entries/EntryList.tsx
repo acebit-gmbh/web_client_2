@@ -58,7 +58,7 @@ const EntryRow = memo(function EntryRow({
       }`}
     >
       {/* Icon */}
-      <EntryIcon type={item.type} icon={item.icon} />
+      <EntryIcon type={item.type} icon={item.icon} databaseIcon={item.database_icon} />
 
       {/* Name */}
       <div className="flex min-w-0 items-center gap-1.5">

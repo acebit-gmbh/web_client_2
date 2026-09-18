@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen, Lock } from 'lucide-react'
 import { useChildren } from '@/hooks/useChildren'
-import type { FolderCompact } from '@/api/types'
+import type { DatabaseIconRef, FolderCompact } from '@/api/types'
 import { isFolder } from '@/api/types'
 import { getIconUrl } from '@/lib/icons'
+import { DatabaseIconImage } from '@/components/icons/DatabaseIconImage'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { focusItem, getVisibleTreeItems, findParent } from './treeKeyboard'
@@ -16,25 +17,55 @@ interface TreeNodeProps {
   onFolderClick: (folderId: string, folderName?: string) => void
 }
 
-function FolderIcon({ icon, expanded }: { icon?: string; expanded: boolean }) {
-  const [imgFailed, setImgFailed] = useState(false)
+const FOLDER_ICON_SIZE = 'h-4 w-4'
+
+/** The bundled standard icon named by `icon`, else the Folder / FolderOpen glyph. */
+function StandardFolderIcon({ icon, expanded }: { icon?: string; expanded: boolean }) {
+  // The URL that failed, not a boolean: a sticky flag would keep the glyph
+  // for good once one image had failed, even after the folder's icon changed.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const iconUrl = getIconUrl(icon)
 
-  if (iconUrl && !imgFailed) {
+  if (iconUrl && failedUrl !== iconUrl) {
     return (
       <img
         src={iconUrl}
         alt=""
-        className="h-4 w-4 shrink-0 object-contain"
-        onError={() => setImgFailed(true)}
+        className={`${FOLDER_ICON_SIZE} shrink-0 object-contain`}
+        onError={() => setFailedUrl(iconUrl)}
       />
     )
   }
 
   return expanded ? (
-    <FolderOpen className="h-4 w-4 shrink-0 text-amber-600" />
+    <FolderOpen className={`${FOLDER_ICON_SIZE} shrink-0 text-amber-600`} />
   ) : (
-    <Folder className="h-4 w-4 shrink-0 text-amber-600" />
+    <Folder className={`${FOLDER_ICON_SIZE} shrink-0 text-amber-600`} />
+  )
+}
+
+interface FolderIconProps {
+  dbId: string
+  icon?: string
+  databaseIcon?: DatabaseIconRef | null
+  expanded: boolean
+}
+
+/**
+ * The icon chain for a folder: database icon -> bundled standard icon named
+ * by `icon` -> Folder / FolderOpen glyph. The database-icon component (and
+ * with it the image query) is mounted only for folders that have one.
+ */
+function FolderIcon({ dbId, icon, databaseIcon, expanded }: FolderIconProps) {
+  const standard = <StandardFolderIcon icon={icon} expanded={expanded} />
+  if (!databaseIcon) return standard
+  return (
+    <DatabaseIconImage
+      icon={databaseIcon}
+      dbId={dbId}
+      className={FOLDER_ICON_SIZE}
+      fallback={standard}
+    />
   )
 }
 
@@ -157,7 +188,12 @@ export function TreeNode({ folder, dbId, activeFolderId, depth, onFolderClick }:
           />
         </button>
 
-        <FolderIcon icon={folder.icon} expanded={expanded} />
+        <FolderIcon
+          dbId={dbId}
+          icon={folder.icon}
+          databaseIcon={folder.database_icon}
+          expanded={expanded}
+        />
         <span className="min-w-0 truncate">{folder.name}</span>
         {folder.has_second_pass && <Lock className="ml-auto h-3 w-3 shrink-0 text-muted-foreground" />}
       </div>

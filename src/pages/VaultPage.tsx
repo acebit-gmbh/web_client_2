@@ -43,18 +43,13 @@ import {
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { createEntry, uploadDocument, deleteEntry, MAX_DOCUMENT_SIZE } from '@/api/entries'
 import { ApiError } from '@/api/client'
+import { formatBytes } from '@/lib/format'
 import { isEntry, type EntryCompact, type EntryType } from '@/api/types'
 
 interface UploadState {
   fileName: string
   progress: number
   controller: AbortController
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(0)} MB`
 }
 
 // Module-scope so it isn't re-created each render (react-hooks/static-components).

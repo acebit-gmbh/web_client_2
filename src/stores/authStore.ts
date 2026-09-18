@@ -7,6 +7,7 @@ import { useNavigationStore } from './navigationStore'
 import { useConnectionStore } from './connectionStore'
 import { clearClipboard } from '@/lib/clipboard'
 import { queryClient } from '@/lib/queryClient'
+import { dbIconBatcher } from '@/lib/dbIcons'
 import { logout as apiLogout } from '@/api/auth'
 
 const AUTH_STORAGE_KEY = 'pd-auth'
@@ -97,6 +98,10 @@ export const useAuthStore = create<AuthState>()(
         useConnectionStore.getState().disconnect()
         queryClient.cancelQueries()
         queryClient.clear()
+        // The icon loader queues requests of its own; drop them, and make it
+        // ignore answers still on their way, so nothing of this session is
+        // fetched with - or cached for - the next one.
+        dbIconBatcher.reset()
         set({
           token: null,
           user: null,

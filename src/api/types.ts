@@ -101,11 +101,82 @@ export interface PaginatedResponse<T> {
 
 // ─── Databases ───────────────────────────────────────────────
 
+/**
+ * Server 20.0.0+: what the server accepts for database icons, published on
+ * every database object. Its PRESENCE is the capability marker - the server
+ * then implements the whole icon contract (`/icons` routes, `database_icon`
+ * on rows, validated `image_*` writes, `icon` always `ico<N>.svg`). Absent =
+ * older server: never call `/icons`, never probe by POST.
+ */
+export interface DatabaseIconsCapability {
+  /** Not a mirror, the caller may upload and the slot count is below `max_count`. 403/4034 can still occur. */
+  can_upload: boolean
+  accepted_types: string[]
+  /** Largest accepted decoded PNG, in bytes. */
+  max_bytes: number
+  /** Largest accepted width and height, in pixels. */
+  max_side: number
+  max_count: number
+  /** Most ids one `GET /icons?ids=` request may carry. */
+  batch_max: number
+}
+
 export interface DatabaseCompact {
   id: string
   name: string
   description: string
   updated_at: string
+  /** Server 20.0.0+: database-icon capability; absent on older servers (feature off). */
+  icons?: DatabaseIconsCapability
+}
+
+// ─── Database Icons (Server 20.0.0+) ─────────────────────────
+
+/**
+ * Reference to an icon stored in the item's OWN database, as carried by
+ * entry and folder rows. `id` is an opaque fetch handle valid only inside
+ * that database (decimal digits, not a UUID and not a value for
+ * `image_name`); `name` is the stable identifier and the value for
+ * `image_name`; `version` changes whenever the stored image changes. Client
+ * cache key: (server, database id, id, version).
+ */
+export interface DatabaseIconRef {
+  id: string
+  name: string
+  version: string
+}
+
+/**
+ * An icon of a database. The plain list carries `id`, `name` and `version`
+ * only. The item route and `?ids=...&include=data` add `state`: `ok` (with
+ * the image fields), `unusable` (the stored image cannot be served: show the
+ * fallback and negative-cache by id + version) or `deferred` (response byte
+ * budget reached: fetch it with the item route).
+ */
+export interface DatabaseIcon extends DatabaseIconRef {
+  state?: string
+  /** `image/png`, or `image/bmp` for legacy slots. Clients allow-list exactly these two. */
+  content_type?: string
+  width?: number
+  height?: number
+  /** RFC 4648 base64, standard alphabet, no line breaks, no `data:` prefix. */
+  data?: string
+}
+
+/** Body of `POST /databases/{db}/icons`. `data` is a base64 PNG of at most `max_side` pixels per side and `max_bytes` bytes. */
+export interface UploadIconRequest {
+  name: string
+  data: string
+}
+
+/**
+ * Answer to an icon upload. `name` is authoritative - the server may have
+ * stored the image as `name (2)` - and is what goes into `image_name`.
+ * `created` is false when a byte-identical icon of that name already existed
+ * (HTTP 200 instead of 201; nothing was written, retries are safe).
+ */
+export interface UploadIconResult extends DatabaseIconRef {
+  created: boolean
 }
 
 // ─── Breadcrumbs ─────────────────────────────────────────────
@@ -121,7 +192,10 @@ export interface FolderCompact {
   type: 'folder'
   id: string
   name: string
+  /** Standard icon file name. Server 20.0.0+: always `ico<N>.svg` (N 0..134) and the fallback when `database_icon` is set. */
   icon?: string
+  /** Server 20.0.0+: the folder's icon in its own database, or null; the key is absent on older servers. */
+  database_icon?: DatabaseIconRef | null
   importance?: string
   category?: string
   tags?: string
@@ -167,7 +241,10 @@ export interface EntryCompact {
   totp?: EntryTotp
   login?: string | null
   url?: string | null
+  /** Standard icon file name. Server 20.0.0+: always `ico<N>.svg` (N 0..134) and the fallback when `database_icon` is set. */
   icon?: string
+  /** Server 20.0.0+: the entry's icon in its own database, or null; the key is absent on older servers. */
+  database_icon?: DatabaseIconRef | null
   importance?: string
   category?: string
   tags?: string
@@ -367,8 +444,15 @@ export interface EntryDetail {
   /** Server 20.0.0+: seedless one-time-code settings; absent on older servers. */
   totp?: EntryTotp
   author?: string
+  /** Standard icon file name; see EntryCompact.icon. */
+  icon?: string
+  /** Server 20.0.0+: the entry's icon in its own database, or null; the key is absent on older servers. */
+  database_icon?: DatabaseIconRef | null
+  /** Raw stored value: true = the entry uses an icon of its database, named by `image_name`. */
   image_custom?: boolean
+  /** Standard icon number 0..134 when `image_custom` is false; otherwise a server-maintained position that REST clients ignore. */
   image_index?: number
+  /** Name of an icon stored in this database (not a file name). */
   image_name?: string
   comments?: string
   importance?: string
@@ -427,6 +511,24 @@ export interface TotpWrite {
   period?: number
 }
 
+/**
+ * Server 20.0.0+: the icon keys of an entry write (`image_custom`,
+ * `image_index`, `image_name` on create and update). A body with none of
+ * them never changes the icon. Send them only in one of three forms:
+ *
+ * - database icon: `{image_custom: true, image_name: '<name from upload or list>'}`
+ *   (the position is server-owned; a client-sent `image_index` is ignored)
+ * - standard icon: `{image_custom: false, image_index: 0..134}`
+ * - type default:  `{image_custom: false, image_index: -1}`
+ *
+ * A change to something unusable is refused with 400 / 4007 and nothing is
+ * written. Older servers store the values unchecked, so send the keys only
+ * when the database reports the `icons` capability.
+ */
+export type EntryIconWrite =
+  | { image_custom: true; image_name: string }
+  | { image_custom: false; image_index: number }
+
 export interface CreateEntryRequest {
   type?: EntryType
   name: string
@@ -440,8 +542,10 @@ export interface CreateEntryRequest {
   custom_fields?: CustomField[]
   urls?: string[]
   expires_at?: string | null
-  /** Standard icon index — see lib/icons.ts#getDefaultImageIndex */
+  /** Server 20.0.0+: icon assignment, see EntryIconWrite. Send none of the three keys to leave the icon alone. */
+  image_custom?: boolean
   image_index?: number
+  image_name?: string
   /** Server 20.0.0+: one-time-code settings; `null` is accepted as a no-op here. */
   totp?: TotpWrite | null
   // Type-specific sub-objects
@@ -467,6 +571,10 @@ export interface UpdateEntryRequest {
   custom_fields?: CustomField[]
   urls?: string[]
   expires_at?: string | null
+  /** Server 20.0.0+: icon assignment, see EntryIconWrite. Absent = the icon is untouched. */
+  image_custom?: boolean
+  image_index?: number
+  image_name?: string
   /** Server 20.0.0+: one-time-code settings; absent = untouched, `null` = remove. */
   totp?: TotpWrite | null
   // Type-specific sub-objects

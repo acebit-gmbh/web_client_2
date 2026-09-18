@@ -5,7 +5,7 @@ import type { CreateEntryRequest, UpdateEntryRequest, MoveRequest } from '@/api/
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { useToast } from '@/hooks/useToast'
-import { describeApiError, isTotpWriteRefusal } from '@/lib/apiErrors'
+import { describeApiError, isIconRefusal, isTotpWriteRefusal } from '@/lib/apiErrors'
 
 export function useCreateEntry(dbId: string) {
   const queryClient = useQueryClient()
@@ -23,8 +23,10 @@ export function useCreateEntry(dbId: string) {
     onError: (err) => {
       // A refused one-time-code write is explained inline by the entry form,
       // in the browser's language and pointing at the field; a toast with the
-      // server's wording on top would contradict it.
-      if (isTotpWriteRefusal(err)) return
+      // server's wording on top would contradict it. The same goes for a
+      // refused icon assignment (400/4007), where the form also reopens the
+      // icon picker.
+      if (isTotpWriteRefusal(err) || isIconRefusal(err)) return
       toast.error(describeApiError(err, t), {
         title: t('toast.entryCreateFailed'),
       })
@@ -55,7 +57,7 @@ export function useUpdateEntry(dbId: string) {
     },
     onError: (err) => {
       // See useCreateEntry: the entry form owns the message for these.
-      if (isTotpWriteRefusal(err)) return
+      if (isTotpWriteRefusal(err) || isIconRefusal(err)) return
       toast.error(describeApiError(err, t), {
         title: t('toast.entryUpdateFailed'),
       })

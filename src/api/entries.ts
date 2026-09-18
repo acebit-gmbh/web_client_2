@@ -1,6 +1,7 @@
 import {
   apiClient,
   ApiError,
+  UploadInterruptedError,
   getServerOrigin,
   buildAuthHeaders,
   notifyApiActivity,
@@ -211,7 +212,9 @@ export function uploadDocument(
       reject(new ApiError(xhr.status, code, message))
     }
 
-    xhr.onerror = () => reject(new Error('Network error during upload'))
+    // No user-facing text here: the api/ layer has no i18n. The UI turns the
+    // typed error into a localized message (describeApiError).
+    xhr.onerror = () => reject(new UploadInterruptedError())
     xhr.onabort = () => reject(new DOMException('Upload aborted', 'AbortError'))
 
     if (options.signal) {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { ApiError, configureApi, type ApiBindings } from './client'
-import { getEntryOtp } from './entries'
+import { ApiError, UploadInterruptedError, configureApi, type ApiBindings } from './client'
+import { getEntryOtp, uploadDocument } from './entries'
 
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), {
@@ -78,5 +78,108 @@ describe('getEntryOtp', () => {
     expect(err).toBeInstanceOf(ApiError)
     expect((err as ApiError).status).toBe(403)
     expect((err as ApiError).code).toBe(4031)
+  })
+})
+
+/** Minimal XMLHttpRequest stand-in: records what uploadDocument does and lets the test fire the outcome. */
+class FakeXhr {
+  static last: FakeXhr | null = null
+  method = ''
+  url = ''
+  headers: Record<string, string> = {}
+  upload: { onprogress: ((event: ProgressEvent) => void) | null } = { onprogress: null }
+  status = 0
+  statusText = ''
+  responseText = ''
+  sent: unknown = undefined
+  onload: (() => void) | null = null
+  onerror: (() => void) | null = null
+  onabort: (() => void) | null = null
+
+  constructor() {
+    FakeXhr.last = this
+  }
+  open(method: string, url: string) {
+    this.method = method
+    this.url = url
+  }
+  setRequestHeader(name: string, value: string) {
+    this.headers[name] = value
+  }
+  send(body: unknown) {
+    this.sent = body
+  }
+  abort() {
+    this.onabort?.()
+  }
+}
+
+describe('uploadDocument', () => {
+  let onActivity: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    FakeXhr.last = null
+    vi.stubGlobal('XMLHttpRequest', FakeXhr)
+    onActivity = vi.fn()
+    configureApi({
+      getContext: vi.fn(() => ({
+        serverOrigin: 'https://pd.example.com:8714' as string,
+        token: 'test-token' as string | null,
+      })) as ApiBindings['getContext'],
+      onActivity: onActivity as ApiBindings['onActivity'],
+      onAuthFailure: vi.fn() as ApiBindings['onAuthFailure'],
+    })
+  })
+
+  const file = () => new File(['hello'], 'notes.txt', { type: 'text/plain' })
+
+  it('PUTs the file to the content sub-resource with the bearer token', async () => {
+    const upload = uploadDocument('d', 'e', file())
+    const xhr = FakeXhr.last!
+    expect(xhr.method).toBe('PUT')
+    expect(xhr.url).toBe('https://pd.example.com:8714/v2.0/databases/d/entries/e/content')
+    expect(xhr.headers.Authorization).toBe('Bearer test-token')
+    expect(xhr.sent).toBeInstanceOf(File)
+
+    xhr.status = 200
+    xhr.responseText = JSON.stringify({ id: 'e', type: 'document', name: 'notes.txt' })
+    xhr.onload!()
+    await expect(upload).resolves.toMatchObject({ id: 'e' })
+    expect(onActivity).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects with the typed UploadInterruptedError when the request never gets an answer', async () => {
+    const upload = uploadDocument('d', 'e', file())
+    FakeXhr.last!.onerror!()
+
+    const err = await upload.catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(UploadInterruptedError)
+    // Not a TypeError (that is fetch's "cannot reach the server") and not an ApiError.
+    expect(err).not.toBeInstanceOf(TypeError)
+    expect(err).not.toBeInstanceOf(ApiError)
+    expect(onActivity).not.toHaveBeenCalled()
+  })
+
+  it('still rejects an HTTP refusal as ApiError(status, code)', async () => {
+    const upload = uploadDocument('d', 'e', file())
+    const xhr = FakeXhr.last!
+    xhr.status = 413
+    xhr.statusText = 'Payload Too Large'
+    xhr.responseText = JSON.stringify({ error: { code: 413, message: 'Too large.' } })
+    xhr.onload!()
+
+    const err = await upload.catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect((err as ApiError).status).toBe(413)
+  })
+
+  it('rejects a cancelled upload as AbortError, not as an interruption', async () => {
+    const controller = new AbortController()
+    const upload = uploadDocument('d', 'e', file(), { signal: controller.signal })
+    controller.abort()
+
+    const err = await upload.catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(DOMException)
+    expect((err as DOMException).name).toBe('AbortError')
   })
 })

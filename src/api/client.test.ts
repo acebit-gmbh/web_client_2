@@ -157,6 +157,22 @@ describe('apiClient', () => {
       await apiClient('/x')
       expect(onActivity).toHaveBeenCalledTimes(1)
     })
+
+    it('does NOT call onActivity on success when skipActivity is set', async () => {
+      fetchMock.mockResolvedValueOnce(jsonResponse({ value: 42 }))
+      const result = await apiClient<{ value: number }>('/x', { skipActivity: true })
+      expect(result).toEqual({ value: 42 })
+      expect(onActivity).not.toHaveBeenCalled()
+    })
+
+    it('does not pass skipActivity on to fetch, and keeps auth and no-store', async () => {
+      fetchMock.mockResolvedValueOnce(jsonResponse({ ok: true }))
+      await apiClient('/x', { skipActivity: true })
+      const init = fetchMock.mock.calls[0][1] as RequestInit
+      expect(init).not.toHaveProperty('skipActivity')
+      expect(init.cache).toBe('no-store')
+      expect((init.headers as Headers).get('Authorization')).toBe('Bearer test-token')
+    })
   })
 
   describe('Error responses', () => {
@@ -193,6 +209,20 @@ describe('apiClient', () => {
       fetchMock.mockResolvedValueOnce(emptyResponse(401))
       await expect(apiClient('/me')).rejects.toBeInstanceOf(ApiError)
       expect(onAuthFailure).toHaveBeenCalledTimes(1)
+    })
+
+    it('skipActivity changes nothing about errors: 401 still logs out, the code is still parsed', async () => {
+      fetchMock.mockResolvedValueOnce(emptyResponse(401))
+      await expect(apiClient('/x', { skipActivity: true })).rejects.toBeInstanceOf(ApiError)
+      expect(onAuthFailure).toHaveBeenCalledTimes(1)
+
+      fetchMock.mockResolvedValueOnce(
+        jsonResponse({ error: { code: 4042, message: 'No such icon.' } }, { status: 404 }),
+      )
+      await expect(apiClient('/x', { skipActivity: true })).rejects.toMatchObject({
+        status: 404,
+        code: 4042,
+      })
     })
 
     it('does NOT trigger onAuthFailure on 401 when skipAuth is set', async () => {
