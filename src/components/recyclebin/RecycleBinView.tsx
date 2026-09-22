@@ -78,6 +78,9 @@ export function RecycleBinView({ dbId }: RecycleBinViewProps) {
           <Trash2 className="h-4 w-4" />
           <span className="font-medium text-foreground">{t('recycleBin.title')}</span>
           {!isLoading && <span>{t('recycleBin.itemCount', { count: total })}</span>}
+          {/* The server drops the oldest rows once the bin passes this, without
+              telling anyone, so the limit is named where the count is. */}
+          {!!capability?.keep && <span>· {t('recycleBin.keeps', { max: capability.keep })}</span>}
         </div>
         {items.length > 0 && (
           <Button variant="outline" size="sm" onClick={() => setConfirmEmpty(true)}>

@@ -112,6 +112,14 @@ describe('RecycleBinView', () => {
     expect(screen.getByRole('button', { name: 'Delete Entry b for good' })).toBeInTheDocument()
   })
 
+  it('names the limit the server silently enforces', async () => {
+    renderBin()
+
+    // The oldest rows are dropped once the bin passes recycle_bin.keep, with no
+    // notice of any kind, so the number is on screen beside the count.
+    expect(await screen.findByText(/keeps up to 100/)).toBeInTheDocument()
+  })
+
   it('shows the empty state, and no way to empty an already empty bin', async () => {
     listMock.mockResolvedValue(page([]))
     renderBin()
