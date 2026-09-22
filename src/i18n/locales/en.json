@@ -156,7 +156,8 @@
     "root": "Root",
     "treeLabel": "Folder navigation",
     "expand": "Expand folder",
-    "collapse": "Collapse folder"
+    "collapse": "Collapse folder",
+    "recycleBin": "Recycle bin"
   },
   "database": {
     "select": "Select database",
@@ -398,7 +399,11 @@
     "deleteEntryDescBin": "Are you sure you want to delete this entry? It is moved to the server's recycle bin, from where it can be restored in the Windows client.",
     "deleteFolderTitle": "Delete Folder",
     "deleteFolderDesc": "Are you sure you want to delete this folder and all its contents? This action cannot be undone.",
-    "deleteFolderDescBin": "Are you sure you want to delete this folder and all its contents? They are moved to the server's recycle bin, from where they can be restored in the Windows client."
+    "deleteFolderDescBin": "Are you sure you want to delete this folder and all its contents? They are moved to the server's recycle bin, from where they can be restored in the Windows client.",
+    "purgeItemTitle": "Delete for good?",
+    "purgeItemDesc": "\"{{name}}\" will be deleted for good. This cannot be undone.",
+    "emptyRecycleBinTitle": "Empty the recycle bin?",
+    "emptyRecycleBinDesc": "Everything in the recycle bin that you may delete will be deleted for good. This cannot be undone."
   },
   "folderPicker": {
     "title": "Select Folder",
@@ -454,7 +459,13 @@
     "fileTooLargeTitle": "File too large",
     "folderGone": "This folder no longer exists.",
     "dismiss": "Dismiss notification",
-    "regionLabel": "Notifications"
+    "regionLabel": "Notifications",
+    "itemRestored": "Item restored",
+    "itemRestoreFailed": "Item could not be restored",
+    "itemPurged": "Item deleted for good",
+    "itemPurgeFailed": "Item could not be deleted",
+    "recycleBinEmptied": "Recycle bin emptied",
+    "recycleBinEmptyFailed": "Recycle bin could not be emptied"
   },
   "upload": {
     "title": "Uploading document",
@@ -474,5 +485,22 @@
     "boundaryTitle": "Something went wrong",
     "searchFailed": "Search failed. Please try again.",
     "loadDatabases": "Could not load your databases. Please try again."
+  },
+  "recycleBin": {
+    "title": "Recycle bin",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "empty": "Empty recycle bin",
+    "emptyState": "The recycle bin is empty",
+    "emptyStateHint": "Entries and folders you delete are kept here until you delete them for good.",
+    "restore": "Restore",
+    "restoreItem": "Restore {{name}}",
+    "purge": "Delete for good",
+    "purgeItem": "Delete {{name}} for good",
+    "folderWithContents": "Folder, with everything in it",
+    "deletedBy": "deleted by {{user}}",
+    "deletedByYou": "deleted by you",
+    "loadFailed": "The recycle bin could not be loaded.",
+    "truncatedNotice": "Showing the first {{count}} items of the recycle bin."
   }
 }

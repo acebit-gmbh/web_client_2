@@ -156,7 +156,8 @@
     "root": "Raíz",
     "treeLabel": "Navegación por carpetas",
     "expand": "Expandir carpeta",
-    "collapse": "Contraer carpeta"
+    "collapse": "Contraer carpeta",
+    "recycleBin": "Papelera de reciclaje"
   },
   "database": {
     "select": "Seleccionar base de datos",
@@ -398,7 +399,11 @@
     "deleteEntryDescBin": "¿Seguro que desea eliminar esta entrada? Se moverá a la papelera de reciclaje del servidor, desde donde se puede restaurar en el cliente de Windows.",
     "deleteFolderTitle": "Eliminar carpeta",
     "deleteFolderDesc": "¿Seguro que desea eliminar esta carpeta y todo su contenido? Esta acción no se puede deshacer.",
-    "deleteFolderDescBin": "¿Seguro que desea eliminar esta carpeta y todo su contenido? Se moverán a la papelera de reciclaje del servidor, desde donde se pueden restaurar en el cliente de Windows."
+    "deleteFolderDescBin": "¿Seguro que desea eliminar esta carpeta y todo su contenido? Se moverán a la papelera de reciclaje del servidor, desde donde se pueden restaurar en el cliente de Windows.",
+    "purgeItemTitle": "¿Eliminar definitivamente?",
+    "purgeItemDesc": "«{{name}}» se eliminará definitivamente. Esta acción no se puede deshacer.",
+    "emptyRecycleBinTitle": "¿Vaciar la papelera?",
+    "emptyRecycleBinDesc": "Todo lo que haya en la papelera y pueda eliminar se eliminará definitivamente. Esta acción no se puede deshacer."
   },
   "folderPicker": {
     "title": "Seleccionar carpeta",
@@ -454,7 +459,13 @@
     "fileTooLargeTitle": "Archivo demasiado grande",
     "folderGone": "Esta carpeta ya no existe.",
     "dismiss": "Descartar notificación",
-    "regionLabel": "Notificaciones"
+    "regionLabel": "Notificaciones",
+    "itemRestored": "Elemento restaurado",
+    "itemRestoreFailed": "No se ha podido restaurar el elemento",
+    "itemPurged": "Elemento eliminado definitivamente",
+    "itemPurgeFailed": "No se ha podido eliminar el elemento",
+    "recycleBinEmptied": "Papelera vaciada",
+    "recycleBinEmptyFailed": "No se ha podido vaciar la papelera"
   },
   "upload": {
     "title": "Subiendo documento",
@@ -474,5 +485,22 @@
     "boundaryTitle": "Algo ha salido mal",
     "searchFailed": "Error en la búsqueda. Inténtelo de nuevo.",
     "loadDatabases": "No se pudieron cargar sus bases de datos. Inténtelo de nuevo."
+  },
+  "recycleBin": {
+    "title": "Papelera de reciclaje",
+    "itemCount_one": "{{count}} elemento",
+    "itemCount_other": "{{count}} elementos",
+    "empty": "Vaciar la papelera",
+    "emptyState": "La papelera está vacía",
+    "emptyStateHint": "Las entradas y carpetas que elimine se guardan aquí hasta que las elimine definitivamente.",
+    "restore": "Restaurar",
+    "restoreItem": "Restaurar {{name}}",
+    "purge": "Eliminar definitivamente",
+    "purgeItem": "Eliminar {{name}} definitivamente",
+    "folderWithContents": "Carpeta, con todo su contenido",
+    "deletedBy": "eliminado por {{user}}",
+    "deletedByYou": "eliminado por usted",
+    "loadFailed": "No se ha podido cargar la papelera.",
+    "truncatedNotice": "Se muestran los primeros {{count}} elementos de la papelera."
   }
 }

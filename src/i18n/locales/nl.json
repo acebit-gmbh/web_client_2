@@ -156,7 +156,8 @@
     "root": "Hoofdmap",
     "treeLabel": "Mapnavigatie",
     "expand": "Map uitvouwen",
-    "collapse": "Map samenvouwen"
+    "collapse": "Map samenvouwen",
+    "recycleBin": "Prullenbak"
   },
   "database": {
     "select": "Database selecteren",
@@ -398,7 +399,11 @@
     "deleteEntryDescBin": "Weet u zeker dat u dit item wilt verwijderen? Het wordt naar de prullenbak van de server verplaatst en kan daar in de Windows-client worden hersteld.",
     "deleteFolderTitle": "Map verwijderen",
     "deleteFolderDesc": "Weet u zeker dat u deze map en de volledige inhoud wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-    "deleteFolderDescBin": "Weet u zeker dat u deze map en de volledige inhoud wilt verwijderen? Ze worden naar de prullenbak van de server verplaatst en kunnen daar in de Windows-client worden hersteld."
+    "deleteFolderDescBin": "Weet u zeker dat u deze map en de volledige inhoud wilt verwijderen? Ze worden naar de prullenbak van de server verplaatst en kunnen daar in de Windows-client worden hersteld.",
+    "purgeItemTitle": "Definitief verwijderen?",
+    "purgeItemDesc": "‚{{name}}’ wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "emptyRecycleBinTitle": "Prullenbak legen?",
+    "emptyRecycleBinDesc": "Alles in de prullenbak dat u mag verwijderen wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt."
   },
   "folderPicker": {
     "title": "Map selecteren",
@@ -454,7 +459,13 @@
     "fileTooLargeTitle": "Bestand te groot",
     "folderGone": "Deze map bestaat niet meer.",
     "dismiss": "Melding sluiten",
-    "regionLabel": "Meldingen"
+    "regionLabel": "Meldingen",
+    "itemRestored": "Item hersteld",
+    "itemRestoreFailed": "Item kon niet worden hersteld",
+    "itemPurged": "Item definitief verwijderd",
+    "itemPurgeFailed": "Item kon niet worden verwijderd",
+    "recycleBinEmptied": "Prullenbak geleegd",
+    "recycleBinEmptyFailed": "Prullenbak kon niet worden geleegd"
   },
   "upload": {
     "title": "Document wordt geüpload",
@@ -474,5 +485,22 @@
     "boundaryTitle": "Er is iets misgegaan",
     "searchFailed": "Zoeken is mislukt. Probeer het opnieuw.",
     "loadDatabases": "Uw databases konden niet worden geladen. Probeer het opnieuw."
+  },
+  "recycleBin": {
+    "title": "Prullenbak",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "empty": "Prullenbak legen",
+    "emptyState": "De prullenbak is leeg",
+    "emptyStateHint": "Items en mappen die u verwijdert blijven hier staan totdat u ze definitief verwijdert.",
+    "restore": "Herstellen",
+    "restoreItem": "{{name}} herstellen",
+    "purge": "Definitief verwijderen",
+    "purgeItem": "{{name}} definitief verwijderen",
+    "folderWithContents": "Map, met de volledige inhoud",
+    "deletedBy": "verwijderd door {{user}}",
+    "deletedByYou": "door u verwijderd",
+    "loadFailed": "De prullenbak kon niet worden geladen.",
+    "truncatedNotice": "De eerste {{count}} items van de prullenbak worden weergegeven."
   }
 }

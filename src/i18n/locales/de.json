@@ -156,7 +156,8 @@
     "root": "Stammverzeichnis",
     "treeLabel": "Ordnernavigation",
     "expand": "Ordner aufklappen",
-    "collapse": "Ordner einklappen"
+    "collapse": "Ordner einklappen",
+    "recycleBin": "Papierkorb"
   },
   "database": {
     "select": "Datenbank ausw\u00e4hlen",
@@ -398,7 +399,11 @@
     "deleteEntryDescBin": "M\u00f6chten Sie diesen Eintrag wirklich l\u00f6schen? Er wird in den Papierkorb des Servers verschoben und kann dort im Windows-Client wiederhergestellt werden.",
     "deleteFolderTitle": "Ordner l\u00f6schen",
     "deleteFolderDesc": "M\u00f6chten Sie diesen Ordner und seinen gesamten Inhalt wirklich l\u00f6schen? Diese Aktion kann nicht r\u00fcckg\u00e4ngig gemacht werden.",
-    "deleteFolderDescBin": "M\u00f6chten Sie diesen Ordner und seinen gesamten Inhalt wirklich l\u00f6schen? Sie werden in den Papierkorb des Servers verschoben und k\u00f6nnen dort im Windows-Client wiederhergestellt werden."
+    "deleteFolderDescBin": "M\u00f6chten Sie diesen Ordner und seinen gesamten Inhalt wirklich l\u00f6schen? Sie werden in den Papierkorb des Servers verschoben und k\u00f6nnen dort im Windows-Client wiederhergestellt werden.",
+    "purgeItemTitle": "Endg\u00fcltig l\u00f6schen?",
+    "purgeItemDesc": "\u201e{{name}}\u201c wird endg\u00fcltig gel\u00f6scht. Das kann nicht r\u00fcckg\u00e4ngig gemacht werden.",
+    "emptyRecycleBinTitle": "Papierkorb leeren?",
+    "emptyRecycleBinDesc": "Alles im Papierkorb, das Sie l\u00f6schen d\u00fcrfen, wird endg\u00fcltig gel\u00f6scht. Das kann nicht r\u00fcckg\u00e4ngig gemacht werden."
   },
   "folderPicker": {
     "title": "Ordner ausw\u00e4hlen",
@@ -454,7 +459,13 @@
     "fileTooLargeTitle": "Datei zu groß",
     "folderGone": "Dieser Ordner existiert nicht mehr.",
     "dismiss": "Benachrichtigung schließen",
-    "regionLabel": "Benachrichtigungen"
+    "regionLabel": "Benachrichtigungen",
+    "itemRestored": "Element wiederhergestellt",
+    "itemRestoreFailed": "Element konnte nicht wiederhergestellt werden",
+    "itemPurged": "Element endgültig gelöscht",
+    "itemPurgeFailed": "Element konnte nicht gelöscht werden",
+    "recycleBinEmptied": "Papierkorb geleert",
+    "recycleBinEmptyFailed": "Papierkorb konnte nicht geleert werden"
   },
   "upload": {
     "title": "Dokument wird hochgeladen",
@@ -474,5 +485,22 @@
     "boundaryTitle": "Etwas ist schief gelaufen",
     "searchFailed": "Suche fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "loadDatabases": "Ihre Datenbanken konnten nicht geladen werden. Bitte versuchen Sie es erneut."
+  },
+  "recycleBin": {
+    "title": "Papierkorb",
+    "itemCount_one": "{{count}} Element",
+    "itemCount_other": "{{count}} Elemente",
+    "empty": "Papierkorb leeren",
+    "emptyState": "Der Papierkorb ist leer",
+    "emptyStateHint": "Gelöschte Einträge und Ordner bleiben hier, bis Sie sie endgültig löschen.",
+    "restore": "Wiederherstellen",
+    "restoreItem": "{{name}} wiederherstellen",
+    "purge": "Endgültig löschen",
+    "purgeItem": "{{name}} endgültig löschen",
+    "folderWithContents": "Ordner, mit seinem gesamten Inhalt",
+    "deletedBy": "gelöscht von {{user}}",
+    "deletedByYou": "von Ihnen gelöscht",
+    "loadFailed": "Der Papierkorb konnte nicht geladen werden.",
+    "truncatedNotice": "Es werden die ersten {{count}} Elemente des Papierkorbs angezeigt."
   }
 }

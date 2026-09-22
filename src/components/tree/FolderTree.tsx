@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Trash2 } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getIconUrl } from '@/lib/icons'
 import { cn } from '@/lib/utils'
@@ -7,16 +9,30 @@ import { TreeNode } from './TreeNode'
 import { focusItem, getVisibleTreeItems } from './treeKeyboard'
 import { useChildren } from '@/hooks/useChildren'
 import { isFolder } from '@/api/types'
+import { useRecycleBinCapability } from '@/hooks/useRecycleBinCapability'
 
 interface FolderTreeProps {
   dbId: string | null
   dbName?: string
   activeFolderId: string | null
   onFolderClick: (folderId: string | null, folderName?: string) => void
+  /** Whether the recycle bin is the current view, so the item can show it. */
+  recycleBinOpen?: boolean
+  onRecycleBinClick?: () => void
 }
 
-export function FolderTree({ dbId, dbName, activeFolderId, onFolderClick }: FolderTreeProps) {
+export function FolderTree({
+  dbId,
+  dbName,
+  activeFolderId,
+  onFolderClick,
+  recycleBinOpen = false,
+  onRecycleBinClick,
+}: FolderTreeProps) {
   const { t } = useTranslation()
+  // Read here rather than prop-drilled: the item exists only where the server
+  // keeps a bin, and the capability is already in the cached databases query.
+  const recycleBin = useRecycleBinCapability(dbId)
 
   // Load root-level children to get the top-level folders
   const { data: rootResponse, isLoading } = useChildren(dbId, null)
@@ -145,6 +161,29 @@ export function FolderTree({ dbId, dbName, activeFolderId, onFolderClick }: Fold
             />
           ))}
         </div>
+      )}
+
+      {/* The recycle bin is not a folder, so it sits outside the tree: it has
+          no place in the folder hierarchy and must not take part in the tree's
+          roving tab stop. Shown only where the server keeps a bin. */}
+      {recycleBin?.enabled && onRecycleBinClick && (
+        <>
+          <Separator className="my-2" />
+          <button
+            type="button"
+            onClick={onRecycleBinClick}
+            aria-current={recycleBinOpen ? 'true' : undefined}
+            className={cn(
+              'flex w-full cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-none',
+              recycleBinOpen
+                ? 'bg-primary/10 font-medium hover:bg-primary/15 focus-visible:bg-primary/15'
+                : 'hover:bg-accent focus-visible:bg-accent',
+            )}
+          >
+            <Trash2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{t('sidebar.recycleBin')}</span>
+          </button>
+        </>
       )}
     </div>
   )

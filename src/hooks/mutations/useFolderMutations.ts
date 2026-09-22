@@ -73,6 +73,8 @@ export function useDeleteFolder(dbId: string) {
       setFolder(null) // Navigate to root after deleting current folder
       queryClient.invalidateQueries({ queryKey: ['children', dbId] })
       queryClient.invalidateQueries({ queryKey: ['search', dbId] })
+      // See useDeleteEntry: a deleted folder lands in the recycle bin.
+      queryClient.invalidateQueries({ queryKey: ['recyclebin', dbId] })
       toast.success(t('toast.folderDeleted'))
     },
     onError: (err) => {

@@ -20,6 +20,7 @@ import { FolderPicker } from '@/components/folders/FolderPicker'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, RotateCw } from 'lucide-react'
+import { RecycleBinView } from '@/components/recyclebin/RecycleBinView'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useVaultAppBar } from '@/hooks/useVaultAppBar'
@@ -112,9 +113,11 @@ export default function VaultPage() {
     currentFolderId,
     currentFolderName,
     selectedEntryId,
+    recycleBinOpen,
     setDatabase,
     setFolder,
     selectEntry,
+    openRecycleBin,
   } = useNavigationStore()
 
   const {
@@ -194,6 +197,15 @@ export default function VaultPage() {
       localStorage.setItem(LAST_DB_KEY, currentDatabaseId)
     }
   }, [currentDatabaseId])
+
+  function handleRecycleBinClick() {
+    openRecycleBin()
+    // The bin is a view of the whole database, so a search would be answering
+    // a different question; and on a phone the sidebar has to get out of the
+    // way, exactly as it does for a folder.
+    setSearchQuery('')
+    setSidebarOpen(false)
+  }
 
   function handleFolderClick(folderId: string | null, folderName?: string) {
     // Look up the name from current items or breadcrumbs if not provided
@@ -374,11 +386,18 @@ export default function VaultPage() {
               dbName={currentDb?.name}
               activeFolderId={currentFolderId}
               onFolderClick={handleFolderClick}
+              recycleBinOpen={recycleBinOpen}
+              onRecycleBinClick={handleRecycleBinClick}
             />
           )
         }
         content={
           <div className="p-4">
+            {/* Three views share this pane. A search wins over both of the
+                others, as it already wins over the folder being browsed: it is
+                typed with the bin open too, and results the user cannot see
+                would be no answer at all. Clearing it returns to whichever of
+                the two is still current. */}
             {isSearching ? (
               searchIsError ? (
                 <ContentError
@@ -395,6 +414,8 @@ export default function VaultPage() {
                   onEntryClick={selectEntry}
                 />
               )
+            ) : recycleBinOpen && currentDatabaseId ? (
+              <RecycleBinView dbId={currentDatabaseId} />
             ) : (
               <>
                 {/* Breadcrumbs + Toolbar */}

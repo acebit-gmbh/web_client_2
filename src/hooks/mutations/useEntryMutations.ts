@@ -90,6 +90,9 @@ export function useDeleteEntry(dbId: string) {
       // Drop the detail cache outright so the panel can't re-open a deleted
       // entry from a still-"fresh" cache entry.
       queryClient.removeQueries({ queryKey: ['entry', dbId, entryId] })
+      // Unless the server keeps no bin, the entry is now IN it (ES-999), so a
+      // bin view open beside this is a listing short of one row.
+      queryClient.invalidateQueries({ queryKey: ['recyclebin', dbId] })
       toast.success(t('toast.entryDeleted'))
     },
     onError: (err) => {

@@ -156,7 +156,8 @@
     "root": "Racine",
     "treeLabel": "Navigation dans les dossiers",
     "expand": "Développer le dossier",
-    "collapse": "Réduire le dossier"
+    "collapse": "Réduire le dossier",
+    "recycleBin": "Corbeille"
   },
   "database": {
     "select": "Sélectionner une base de données",
@@ -398,7 +399,11 @@
     "deleteEntryDescBin": "Voulez-vous vraiment supprimer cette entrée ? Elle est déplacée vers la corbeille du serveur, d'où elle peut être restaurée dans le client Windows.",
     "deleteFolderTitle": "Supprimer le dossier",
     "deleteFolderDesc": "Voulez-vous vraiment supprimer ce dossier et tout son contenu ? Cette action ne peut pas être annulée.",
-    "deleteFolderDescBin": "Voulez-vous vraiment supprimer ce dossier et tout son contenu ? Ils sont déplacés vers la corbeille du serveur, d'où ils peuvent être restaurés dans le client Windows."
+    "deleteFolderDescBin": "Voulez-vous vraiment supprimer ce dossier et tout son contenu ? Ils sont déplacés vers la corbeille du serveur, d'où ils peuvent être restaurés dans le client Windows.",
+    "purgeItemTitle": "Supprimer définitivement ?",
+    "purgeItemDesc": "« {{name}} » sera supprimé définitivement. Cette action est irréversible.",
+    "emptyRecycleBinTitle": "Vider la corbeille ?",
+    "emptyRecycleBinDesc": "Tout ce que vous êtes autorisé à supprimer dans la corbeille sera supprimé définitivement. Cette action est irréversible."
   },
   "folderPicker": {
     "title": "Sélectionner un dossier",
@@ -454,7 +459,13 @@
     "fileTooLargeTitle": "Fichier trop volumineux",
     "folderGone": "Ce dossier n'existe plus.",
     "dismiss": "Fermer la notification",
-    "regionLabel": "Notifications"
+    "regionLabel": "Notifications",
+    "itemRestored": "Élément restauré",
+    "itemRestoreFailed": "L’élément n’a pas pu être restauré",
+    "itemPurged": "Élément supprimé définitivement",
+    "itemPurgeFailed": "L’élément n’a pas pu être supprimé",
+    "recycleBinEmptied": "Corbeille vidée",
+    "recycleBinEmptyFailed": "La corbeille n’a pas pu être vidée"
   },
   "upload": {
     "title": "Téléversement du document",
@@ -474,5 +485,22 @@
     "boundaryTitle": "Une erreur est survenue",
     "searchFailed": "La recherche a échoué. Veuillez réessayer.",
     "loadDatabases": "Impossible de charger vos bases de données. Veuillez réessayer."
+  },
+  "recycleBin": {
+    "title": "Corbeille",
+    "itemCount_one": "{{count}} élément",
+    "itemCount_other": "{{count}} éléments",
+    "empty": "Vider la corbeille",
+    "emptyState": "La corbeille est vide",
+    "emptyStateHint": "Les entrées et dossiers que vous supprimez restent ici jusqu’à leur suppression définitive.",
+    "restore": "Restaurer",
+    "restoreItem": "Restaurer {{name}}",
+    "purge": "Supprimer définitivement",
+    "purgeItem": "Supprimer {{name}} définitivement",
+    "folderWithContents": "Dossier, avec tout son contenu",
+    "deletedBy": "supprimé par {{user}}",
+    "deletedByYou": "supprimé par vous",
+    "loadFailed": "La corbeille n’a pas pu être chargée.",
+    "truncatedNotice": "Affichage des {{count}} premiers éléments de la corbeille."
   }
 }
