@@ -3,6 +3,16 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
+import { readFileSync } from 'node:fs'
+
+// The one source of the version: package.json, read at config time. Kept out of
+// an `import` of the JSON so neither tsconfig needs resolveJsonModule. The same
+// three lines are in vitest.config.ts - both configs have to define it, because a test never
+// goes through the app's build.
+const { version } = JSON.parse(
+  readFileSync(path.resolve(__dirname, './package.json'), 'utf-8'),
+) as { version: string }
+
 export default defineConfig(({ mode }) => {
   // Dev-server proxy target — where `npm run dev` forwards the PD Server routes.
   // Set DEV_PROXY_TARGET in a (gitignored) .env.local to point at your server,
@@ -17,6 +27,9 @@ export default defineConfig(({ mode }) => {
   return {
     base: './',
     plugins: [react(), tailwindcss()],
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

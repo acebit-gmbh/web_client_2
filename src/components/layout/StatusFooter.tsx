@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
-const APP_VERSION = '2.0.1'
+// Substituted at build time from package.json; see src/vite-env.d.ts.
+const APP_VERSION = __APP_VERSION__
 
 export function StatusFooter() {
   const { t } = useTranslation()
