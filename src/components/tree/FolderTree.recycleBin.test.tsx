@@ -63,17 +63,23 @@ describe('FolderTree recycle bin item', () => {
     expect(onRecycleBinClick).toHaveBeenCalledTimes(1)
   })
 
-  it('leaves it out where the server keeps none, and where it is not listed', async () => {
+  it('leaves it out where the server keeps no bin', async () => {
     renderTree(NO_BIN)
-    expect(screen.queryByRole('button', { name: 'Recycle bin' })).not.toBeInTheDocument()
 
-    // An older server sends no capability object at all.
-    queryClient.setQueryData(['databases'], {
-      data: [db()],
-      total: 1,
-      offset: 0,
-      limit: 200,
-    })
+    // Wait for the tree itself: by then the item would have rendered if the
+    // capability had allowed it. Asserting before that proves nothing.
+    await screen.findByRole('tree')
+    expect(screen.queryByRole('button', { name: 'Recycle bin' })).not.toBeInTheDocument()
+  })
+
+  it('leaves it out where the database carries no capability at all', async () => {
+    // An older server sends no recycle_bin object. This is a render of its
+    // own: changing the cached databases response under a mounted tree does
+    // not repaint it within the same tick, and an assertion there would pass
+    // whatever the component does.
+    renderTree(undefined)
+
+    await screen.findByRole('tree')
     expect(screen.queryByRole('button', { name: 'Recycle bin' })).not.toBeInTheDocument()
   })
 
