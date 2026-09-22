@@ -394,8 +394,10 @@
   "confirm": {
     "deleteEntryTitle": "Eliminar entrada",
     "deleteEntryDesc": "¿Seguro que desea eliminar esta entrada? Esta acción no se puede deshacer.",
+    "deleteEntryDescBin": "¿Seguro que desea eliminar esta entrada? Se moverá a la papelera de reciclaje del servidor, desde donde se puede restaurar en el cliente de Windows.",
     "deleteFolderTitle": "Eliminar carpeta",
-    "deleteFolderDesc": "¿Seguro que desea eliminar esta carpeta y todo su contenido? Esta acción no se puede deshacer."
+    "deleteFolderDesc": "¿Seguro que desea eliminar esta carpeta y todo su contenido? Esta acción no se puede deshacer.",
+    "deleteFolderDescBin": "¿Seguro que desea eliminar esta carpeta y todo su contenido? Se moverán a la papelera de reciclaje del servidor, desde donde se pueden restaurar en el cliente de Windows."
   },
   "folderPicker": {
     "title": "Seleccionar carpeta",

@@ -108,6 +108,22 @@ export interface PaginatedResponse<T> {
  * on rows, validated `image_*` writes, `icon` always `ico<N>.svg`). Absent =
  * older server: never call `/icons`, never probe by POST.
  */
+/**
+ * Server 20.0.0+: what a DELETE does with an entry or a folder, and what can be
+ * done with the recycle bin afterwards. The object's presence is the marker for
+ * the whole feature - the `mode` parameter of a DELETE and the `/recyclebin`
+ * routes. An older server sends nothing here and destroys what it deletes, so
+ * never promise a user that a deletion can be undone without reading `enabled`.
+ */
+export interface DatabaseRecycleBinCapability {
+  /** The server keeps a recycle bin. When false, every delete is permanent. */
+  enabled: boolean
+  /** How many items the bin keeps; 0 when it is off. Beyond it the oldest go. */
+  keep: number
+  /** The caller may also see and act on what OTHER people deleted. */
+  can_manage: boolean
+}
+
 export interface DatabaseIconsCapability {
   /** Not a mirror, the caller may upload and the slot count is below `max_count`. 403/4034 can still occur. */
   can_upload: boolean
@@ -128,6 +144,8 @@ export interface DatabaseCompact {
   updated_at: string
   /** Server 20.0.0+: database-icon capability; absent on older servers (feature off). */
   icons?: DatabaseIconsCapability
+  /** Server 20.0.0+; absent on an older server. See the interface. */
+  recycle_bin?: DatabaseRecycleBinCapability
 }
 
 // ─── Database Icons (Server 20.0.0+) ─────────────────────────

@@ -53,8 +53,19 @@ export function updateFolder(
   })
 }
 
-export function deleteFolder(dbId: string, folderId: string): Promise<void> {
-  return apiClient<void>(`/databases/${dbId}/folders/${folderId}`, {
+/**
+ * Server 20.0.0+ moves the item to the database's recycle bin unless `mode` is
+ * `'permanent'`; an older server ignores the parameter and always destroys it,
+ * so pass `'permanent'` when the caller means gone, and read
+ * `database.recycle_bin.enabled` before telling anyone it can be undone.
+ */
+export function deleteFolder(
+  dbId: string,
+  folderId: string,
+  mode?: 'recycle' | 'permanent',
+): Promise<void> {
+  const query = mode ? `?mode=${mode}` : ''
+  return apiClient<void>(`/databases/${dbId}/folders/${folderId}${query}`, {
     method: 'DELETE',
   })
 }

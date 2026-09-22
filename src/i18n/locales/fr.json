@@ -394,8 +394,10 @@
   "confirm": {
     "deleteEntryTitle": "Supprimer l'entrée",
     "deleteEntryDesc": "Voulez-vous vraiment supprimer cette entrée ? Cette action ne peut pas être annulée.",
+    "deleteEntryDescBin": "Voulez-vous vraiment supprimer cette entrée ? Elle est déplacée vers la corbeille du serveur, d'où elle peut être restaurée dans le client Windows.",
     "deleteFolderTitle": "Supprimer le dossier",
-    "deleteFolderDesc": "Voulez-vous vraiment supprimer ce dossier et tout son contenu ? Cette action ne peut pas être annulée."
+    "deleteFolderDesc": "Voulez-vous vraiment supprimer ce dossier et tout son contenu ? Cette action ne peut pas être annulée.",
+    "deleteFolderDescBin": "Voulez-vous vraiment supprimer ce dossier et tout son contenu ? Ils sont déplacés vers la corbeille du serveur, d'où ils peuvent être restaurés dans le client Windows."
   },
   "folderPicker": {
     "title": "Sélectionner un dossier",

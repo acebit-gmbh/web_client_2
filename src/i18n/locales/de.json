@@ -394,8 +394,10 @@
   "confirm": {
     "deleteEntryTitle": "Eintrag l\u00f6schen",
     "deleteEntryDesc": "M\u00f6chten Sie diesen Eintrag wirklich l\u00f6schen? Diese Aktion kann nicht r\u00fcckg\u00e4ngig gemacht werden.",
+    "deleteEntryDescBin": "M\u00f6chten Sie diesen Eintrag wirklich l\u00f6schen? Er wird in den Papierkorb des Servers verschoben und kann dort im Windows-Client wiederhergestellt werden.",
     "deleteFolderTitle": "Ordner l\u00f6schen",
-    "deleteFolderDesc": "M\u00f6chten Sie diesen Ordner und seinen gesamten Inhalt wirklich l\u00f6schen? Diese Aktion kann nicht r\u00fcckg\u00e4ngig gemacht werden."
+    "deleteFolderDesc": "M\u00f6chten Sie diesen Ordner und seinen gesamten Inhalt wirklich l\u00f6schen? Diese Aktion kann nicht r\u00fcckg\u00e4ngig gemacht werden.",
+    "deleteFolderDescBin": "M\u00f6chten Sie diesen Ordner und seinen gesamten Inhalt wirklich l\u00f6schen? Sie werden in den Papierkorb des Servers verschoben und k\u00f6nnen dort im Windows-Client wiederhergestellt werden."
   },
   "folderPicker": {
     "title": "Ordner ausw\u00e4hlen",

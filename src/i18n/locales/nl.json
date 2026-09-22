@@ -394,8 +394,10 @@
   "confirm": {
     "deleteEntryTitle": "Item verwijderen",
     "deleteEntryDesc": "Weet u zeker dat u dit item wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "deleteEntryDescBin": "Weet u zeker dat u dit item wilt verwijderen? Het wordt naar de prullenbak van de server verplaatst en kan daar in de Windows-client worden hersteld.",
     "deleteFolderTitle": "Map verwijderen",
-    "deleteFolderDesc": "Weet u zeker dat u deze map en de volledige inhoud wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+    "deleteFolderDesc": "Weet u zeker dat u deze map en de volledige inhoud wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "deleteFolderDescBin": "Weet u zeker dat u deze map en de volledige inhoud wilt verwijderen? Ze worden naar de prullenbak van de server verplaatst en kunnen daar in de Windows-client worden hersteld."
   },
   "folderPicker": {
     "title": "Map selecteren",

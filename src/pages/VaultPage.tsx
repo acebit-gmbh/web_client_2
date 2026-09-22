@@ -265,7 +265,10 @@ export default function VaultPage() {
       // linger as a mystery empty document. Best-effort.
       if (createdEntryId) {
         try {
-          await deleteEntry(currentDatabaseId, createdEntryId)
+          // 'permanent': as far as the user is concerned this entry never
+          // existed, and a half-made document in the recycle bin would be one
+          // more mystery rather than one fewer.
+          await deleteEntry(currentDatabaseId, createdEntryId, 'permanent')
         } catch {
           // Leave it if the cleanup itself fails — nothing more we can do.
         }
@@ -518,7 +521,11 @@ export default function VaultPage() {
         onClose={() => setShowDeleteEntry(false)}
         onConfirm={() => selectedEntryId && deleteEntryMut.mutate(selectedEntryId)}
         title={t('confirm.deleteEntryTitle')}
-        description={t('confirm.deleteEntryDesc')}
+        description={
+          currentDb?.recycle_bin?.enabled
+            ? t('confirm.deleteEntryDescBin')
+            : t('confirm.deleteEntryDesc')
+        }
         destructive
       />
 
@@ -585,7 +592,11 @@ export default function VaultPage() {
         onClose={deleteFolderDialog.close}
         onConfirm={() => currentFolderId && deleteFolderMut.mutate(currentFolderId)}
         title={t('confirm.deleteFolderTitle')}
-        description={t('confirm.deleteFolderDesc')}
+        description={
+          currentDb?.recycle_bin?.enabled
+            ? t('confirm.deleteFolderDescBin')
+            : t('confirm.deleteFolderDesc')
+        }
         destructive
       />
 
