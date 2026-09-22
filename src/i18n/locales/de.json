@@ -281,6 +281,7 @@
     "generate": "Generieren",
     "create": "Erstellen",
     "tagsPlaceholder": "Tag1, Tag2, Tag3",
+    "categoryPlaceholder": "Banking, Internet, ...",
     "invalidValidThru": "Gültig bis muss im Format MM/JJJJ angegeben werden (z. B. 08/2028).",
     "expiresFromValidThru": "Wird bei Kreditkarten automatisch aus \"Gültig bis\" gesetzt.",
     "linkedNotice": "Login und Passwort dieses Eintrags sind mit einem anderen Eintrag verknüpft und können hier nicht bearbeitet werden.",

@@ -281,6 +281,7 @@
     "generate": "Générer",
     "create": "Créer",
     "tagsPlaceholder": "tag1, tag2, tag3",
+    "categoryPlaceholder": "Banque, Internet, ...",
     "invalidValidThru": "« Valide jusqu'au » doit être au format MM/AAAA (p. ex. 08/2028).",
     "expiresFromValidThru": "Défini automatiquement à partir de « Valide jusqu'au » pour les cartes de crédit.",
     "linkedNotice": "L'identifiant et le mot de passe de cette entrée sont liés à une autre entrée et ne peuvent pas être modifiés ici.",

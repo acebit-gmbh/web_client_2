@@ -281,6 +281,7 @@
     "generate": "Generate",
     "create": "Create",
     "tagsPlaceholder": "tag1, tag2, tag3",
+    "categoryPlaceholder": "Banking, Internet, ...",
     "invalidValidThru": "Valid Thru must be in MM/YYYY format (e.g. 08/2028).",
     "expiresFromValidThru": "Set automatically from Valid Thru for Credit Card entries.",
     "linkedNotice": "This entry's login and password are linked from another entry and cannot be edited here.",

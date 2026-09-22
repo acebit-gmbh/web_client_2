@@ -281,6 +281,7 @@
     "generate": "Genereren",
     "create": "Aanmaken",
     "tagsPlaceholder": "tag1, tag2, tag3",
+    "categoryPlaceholder": "Bankieren, Internet, ...",
     "invalidValidThru": "'Geldig tot' moet de notatie MM/JJJJ hebben (bijv. 08/2028).",
     "expiresFromValidThru": "Wordt bij creditcards automatisch ingesteld op basis van 'Geldig tot'.",
     "linkedNotice": "De login en het wachtwoord van dit item zijn gekoppeld aan een ander item en kunnen hier niet worden bewerkt.",

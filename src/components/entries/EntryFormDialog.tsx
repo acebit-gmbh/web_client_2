@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { Loader2, Wand2 } from 'lucide-react'
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useCategories } from '@/hooks/useCategories'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -94,6 +95,9 @@ export function EntryFormDialog({
   // present them as read-only to avoid misleading the user.
   const isLinked = !!entry?.is_link
   const [error, setError] = useState<string | null>(null)
+  const { data: categoryList } = useCategories(dbId)
+  const categories = categoryList?.data ?? []
+  const categoryListId = useId()
   const [showPasswordGen, setShowPasswordGen] = useState(false)
 
   // Form state — initialize from entry if editing. The dialog is
@@ -105,6 +109,7 @@ export function EntryFormDialog({
   const [pass, setPass] = useState(entry?.pass ?? '')
   const [url, setUrl] = useState(entry?.url ?? '')
   const [comments, setComments] = useState(entry?.comments ?? '')
+  const [category, setCategory] = useState(entry?.category ?? '')
   const [tags, setTags] = useState(entry?.tags ?? '')
   const [importance, setImportance] = useState(entry?.importance ?? 'normal')
   const [expiresAt, setExpiresAt] = useState(entry?.expires_at?.split('T')[0] ?? '')
@@ -218,6 +223,7 @@ export function EntryFormDialog({
       importance,
       tags: clearable(tags),
       comments: clearable(comments),
+      category: clearable(category),
     }
     // `type` only belongs in a create payload; UpdateEntryRequest has no
     // `type`, so omit it when editing.
@@ -551,6 +557,32 @@ export function EntryFormDialog({
                 data-1p-ignore
                 data-lpignore="true"
               />
+            </div>
+
+            {/* Free text with the database's own list as suggestions - the
+                same as the Windows client, whose category control is an
+                editable combo box. A server older than 20.0.0 has no list, and
+                then this is simply a text field. Saving a new value teaches
+                the list (the server adopts it), which is why the mutations
+                invalidate ['db-categories']. */}
+            <div className="space-y-2">
+              <Label>{t('entry.category')}</Label>
+              <Input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder={t('entryForm.categoryPlaceholder')}
+                list={categoryListId}
+                autoComplete="off"
+                data-1p-ignore
+                data-lpignore="true"
+              />
+              {categories.length > 0 && (
+                <datalist id={categoryListId} data-testid="category-options">
+                  {categories.map((name) => (
+                    <option key={name} value={name} />
+                  ))}
+                </datalist>
+              )}
             </div>
 
             <div className="space-y-2">

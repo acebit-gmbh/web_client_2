@@ -18,6 +18,9 @@ export function useCreateEntry(dbId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['children', dbId] })
       queryClient.invalidateQueries({ queryKey: ['search', dbId] })
+      // A saved entry can introduce a category the server then adds to the
+      // database's list (Server 20.0.0), so the picker has to be re-read.
+      queryClient.invalidateQueries({ queryKey: ['db-categories', dbId] })
       toast.success(t('toast.entryCreated'))
     },
     onError: (err) => {
@@ -52,6 +55,9 @@ export function useUpdateEntry(dbId: string) {
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ['children', dbId] })
       queryClient.invalidateQueries({ queryKey: ['search', dbId] })
+      // A saved entry can introduce a category the server then adds to the
+      // database's list (Server 20.0.0), so the picker has to be re-read.
+      queryClient.invalidateQueries({ queryKey: ['db-categories', dbId] })
       queryClient.invalidateQueries({ queryKey: ['entry', dbId, variables.entryId] })
       toast.success(t('toast.entryUpdated'))
     },

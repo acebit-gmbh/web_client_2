@@ -281,6 +281,7 @@
     "generate": "Generar",
     "create": "Crear",
     "tagsPlaceholder": "etiqueta1, etiqueta2, etiqueta3",
+    "categoryPlaceholder": "Banca, Internet, ...",
     "invalidValidThru": "«Válida hasta» debe tener el formato MM/AAAA (p. ej., 08/2028).",
     "expiresFromValidThru": "Se establece automáticamente a partir de «Válida hasta» en las tarjetas de crédito.",
     "linkedNotice": "El usuario y la contraseña de esta entrada están vinculados a otra entrada y no se pueden editar aquí.",
