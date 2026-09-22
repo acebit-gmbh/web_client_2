@@ -465,6 +465,7 @@
     "itemPurged": "Element endgültig gelöscht",
     "itemPurgeFailed": "Element konnte nicht gelöscht werden",
     "recycleBinEmptied": "Papierkorb geleert",
+    "recycleBinPartlyEmptied": "Elemente, die Sie nicht löschen dürfen, sind weiterhin im Papierkorb",
     "recycleBinEmptyFailed": "Papierkorb konnte nicht geleert werden"
   },
   "upload": {

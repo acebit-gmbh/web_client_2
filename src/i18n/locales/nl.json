@@ -465,6 +465,7 @@
     "itemPurged": "Item definitief verwijderd",
     "itemPurgeFailed": "Item kon niet worden verwijderd",
     "recycleBinEmptied": "Prullenbak geleegd",
+    "recycleBinPartlyEmptied": "Items die u niet mag verwijderen staan nog in de prullenbak",
     "recycleBinEmptyFailed": "Prullenbak kon niet worden geleegd"
   },
   "upload": {

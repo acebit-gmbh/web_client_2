@@ -465,6 +465,7 @@
     "itemPurged": "Elemento eliminado definitivamente",
     "itemPurgeFailed": "No se ha podido eliminar el elemento",
     "recycleBinEmptied": "Papelera vaciada",
+    "recycleBinPartlyEmptied": "Los elementos que no puede eliminar siguen en la papelera",
     "recycleBinEmptyFailed": "No se ha podido vaciar la papelera"
   },
   "upload": {

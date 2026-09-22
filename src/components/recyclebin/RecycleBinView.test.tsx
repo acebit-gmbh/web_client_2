@@ -199,6 +199,25 @@ describe('RecycleBinView', () => {
     await waitFor(() => expect(screen.queryByText('Entry a')).not.toBeInTheDocument())
     expect(screen.getByText('Entry b')).toBeInTheDocument()
     expect(screen.queryByText('The recycle bin is empty')).not.toBeInTheDocument()
+    // ... and the message says so, rather than reporting an empty bin over it.
+    await waitFor(() => expect(useToastStore.getState().toasts).toHaveLength(1))
+    expect(useToastStore.getState().toasts[0].message).toBe(
+      'Items you may not delete are still in the recycle bin',
+    )
+  })
+
+  it('reports an emptied bin only when the bin really is empty', async () => {
+    renderBin()
+    await screen.findByText('Entry a')
+
+    listMock.mockResolvedValue(page([]))
+    await userEvent.click(screen.getByRole('button', { name: 'Empty recycle bin' }))
+    const dialog = await screen.findByRole('dialog')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Empty recycle bin' }))
+
+    expect(await screen.findByText('The recycle bin is empty')).toBeInTheDocument()
+    await waitFor(() => expect(useToastStore.getState().toasts).toHaveLength(1))
+    expect(useToastStore.getState().toasts[0].message).toBe('Recycle bin emptied')
   })
 
   it('names who deleted an item, and never shows the id it is given as', async () => {

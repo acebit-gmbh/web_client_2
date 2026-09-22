@@ -465,6 +465,7 @@
     "itemPurged": "Item deleted for good",
     "itemPurgeFailed": "Item could not be deleted",
     "recycleBinEmptied": "Recycle bin emptied",
+    "recycleBinPartlyEmptied": "Items you may not delete are still in the recycle bin",
     "recycleBinEmptyFailed": "Recycle bin could not be emptied"
   },
   "upload": {

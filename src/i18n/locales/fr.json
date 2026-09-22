@@ -465,6 +465,7 @@
     "itemPurged": "Élément supprimé définitivement",
     "itemPurgeFailed": "L’élément n’a pas pu être supprimé",
     "recycleBinEmptied": "Corbeille vidée",
+    "recycleBinPartlyEmptied": "Les éléments que vous n’êtes pas autorisé à supprimer sont toujours dans la corbeille",
     "recycleBinEmptyFailed": "La corbeille n’a pas pu être vidée"
   },
   "upload": {
