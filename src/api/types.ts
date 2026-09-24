@@ -257,6 +257,8 @@ export interface EntryCompact {
   has_otp?: boolean
   /** Server 20.0.0+: seedless one-time-code settings; absent on older servers. */
   totp?: EntryTotp
+  /** Server 20.0.0+: the conditional-access warning, or null; the key is absent on older servers. Read-only. */
+  warning?: EntryWarning | null
   login?: string | null
   url?: string | null
   /** Standard icon file name. Server 20.0.0+: always `ico<N>.svg` (N 0..134) and the fallback when `database_icon` is set. */
@@ -449,6 +451,33 @@ export interface EntryTotp {
   conforming?: boolean
 }
 
+// ─── Conditional Access (Server 20.0.0+) ─────────────────────
+
+/**
+ * Server 20.0.0+: the warning set in the Windows client ("Show the warning
+ * message on access"), on every entry representation and for every caller
+ * who receives the entry; `null` when there is none, and the key is absent
+ * on older servers (both mean: show nothing). For a link it is the link's
+ * own warning. Folders never carry it.
+ *
+ * `message` is plain text, possibly with line breaks, and is rendered as
+ * text. `level` is `info` (show it, do not block), `confirm` (continue only
+ * on OK) or `verify` (OK only after ticking a checkbox labelled
+ * `verify_text`, or the client's own "I agree" when that is empty). It is
+ * typed as a plain string on purpose: a level the client does not know is
+ * treated as `verify` (lib/conditionalAccess.ts).
+ *
+ * Read-only: never sent in a create or update body. The server does not
+ * enforce it - it answers the entry, `/otp` and `/content` either way, so
+ * showing it before the entry is opened is the client's job.
+ */
+export interface EntryWarning {
+  message: string
+  level: string
+  /** The checkbox label for `verify`; `""` for every other level. */
+  verify_text?: string
+}
+
 // ─── Entry Detail (full representation) ──────────────────────
 
 export interface EntryDetail {
@@ -461,6 +490,8 @@ export interface EntryDetail {
   has_otp?: boolean
   /** Server 20.0.0+: seedless one-time-code settings; absent on older servers. */
   totp?: EntryTotp
+  /** Server 20.0.0+: the conditional-access warning, or null; the key is absent on older servers. Read-only. */
+  warning?: EntryWarning | null
   author?: string
   /** Standard icon file name; see EntryCompact.icon. */
   icon?: string

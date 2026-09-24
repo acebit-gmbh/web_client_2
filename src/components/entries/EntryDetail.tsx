@@ -1,20 +1,28 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Star, Pencil, FolderInput, Trash2, RotateCw } from 'lucide-react'
+import { Star, Pencil, FolderInput, Trash2, RotateCw, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { EntryIcon } from './EntryIcon'
 import { EntryTypeRouter } from './EntryTypeRouter'
 import { OneTimeCodeField } from './OneTimeCodeField'
+import { ConditionalAccessPrompt } from './ConditionalAccessPrompt'
 import { SecondPasswordPrompt } from '@/components/common/SecondPasswordPrompt'
 import { useEntry } from '@/hooks/useEntry'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { getEntry } from '@/api/entries'
 import { describeApiError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
+import {
+  needsAnswer,
+  pendingWarning,
+  warningIdentity,
+  warningMessageText,
+} from '@/lib/conditionalAccess'
 import type { ApiError } from '@/api/client'
 import type { EntryCompact } from '@/api/types'
 
@@ -65,17 +73,35 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
   const setSecondPassword = useSecondPasswordStore((s) => s.setSecondPassword)
   const clearSecondPassword = useSecondPasswordStore((s) => s.clearSecondPassword)
 
+  // Conditional access (Server 20.0.0+). A confirm or verify warning is
+  // answered BEFORE anything reads the entry: before useEntry, and before the
+  // second-password prompt, whose check is itself a full read. The listing
+  // already carries the warning, so no request is needed to know it. What was
+  // answered lives here and nowhere else - this component is keyed by the
+  // selected entry, so selecting it again asks again.
+  const [answeredWarnings, setAnsweredWarnings] = useState<string[]>([])
+  const listedWarning = compactEntry?.warning
+  const mustAnswerListed = needsAnswer(listedWarning, answeredWarnings)
+
   const needsSecondPassword = !!compactEntry?.has_second_pass && !secondPassword
   const { data: entry, isLoading, error, refetch } = useEntry(
     dbId,
-    needsSecondPassword ? null : entryId,
+    needsSecondPassword || mustAnswerListed ? null : entryId,
     secondPassword,
   )
 
+  // The listing can be minutes old. A blocking warning in the entry as read
+  // that was not answered - a changed one, or one the listing did not have
+  // yet - keeps the content hidden until it is answered too.
+  const warningToAnswer = pendingWarning(listedWarning, entry?.warning, answeredWarnings)
+  // Shown above the content: an info warning at once (it never blocks), a
+  // confirm or verify one once it has been answered.
+  const shownWarning = warningToAnswer ? null : entry ? entry.warning : listedWarning
+
   // The prompt is open exactly when the entry needs unlocking — derived from
   // store state, no local mirror to drift (cancelling deselects the entry,
-  // which unmounts this component).
-  const showSecondPasswordPrompt = needsSecondPassword
+  // which unmounts this component). It waits for the warning to be answered.
+  const showSecondPasswordPrompt = needsSecondPassword && !warningToAnswer
 
   // Defensive: if a cached password is rejected later in the session (the
   // server-side second-password cache can expire independently), clear it and
@@ -98,9 +124,15 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
   // the inline error + field-clear); caching the password flips
   // needsSecondPassword off, which closes the prompt.
   async function handleSecondPasswordSubmit(password: string) {
-    if (!entryId) return
+    if (!entryId || mustAnswerListed) return
     await getEntry(dbId, entryId, password)
     setSecondPassword(entryId, password)
+  }
+
+  function handleWarningAnswered() {
+    if (!warningToAnswer) return
+    const identity = warningIdentity(warningToAnswer)
+    setAnsweredWarnings((answered) => [...answered, identity])
   }
 
   if (!compactEntry) {
@@ -144,8 +176,19 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
 
         <Separator className="mb-4" />
 
-        {/* Content */}
-        {isLoading ? (
+        {/* Conditional access (Server 20.0.0+) - rendered from data, not a toast from an effect */}
+        {shownWarning && (
+          <Alert className="mb-4 border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <AlertTriangle aria-hidden="true" />
+            <AlertTitle>{t('entry.conditionalAccess.title')}</AlertTitle>
+            <AlertDescription className="break-words whitespace-pre-wrap text-current">
+              {warningMessageText(shownWarning)}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Content - withheld while a warning waits for an answer */}
+        {warningToAnswer ? null : isLoading ? (
           <div className="space-y-4">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-6 w-full" />
@@ -252,7 +295,7 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
       </div>
 
       {/* Action buttons — pinned to bottom on desktop, inline on mobile */}
-      {entry && (onEdit || onMove || onDelete) && (
+      {entry && !warningToAnswer && (onEdit || onMove || onDelete) && (
         <div className="px-4 pb-4 lg:shrink-0 lg:border-t lg:p-4">
           <div className="flex gap-2">
             {onEdit && (
@@ -275,6 +318,18 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
             )}
           </div>
         </div>
+      )}
+
+      {/* Conditional-access prompt - before the entry is read, and before the second password */}
+      {warningToAnswer && (
+        <ConditionalAccessPrompt
+          key={warningIdentity(warningToAnswer)}
+          warning={warningToAnswer}
+          entryName={compactEntry.name}
+          entryType={typeName}
+          onConfirm={handleWarningAnswered}
+          onCancel={() => selectEntry(null)}
+        />
       )}
 
       {/* Second password prompt */}

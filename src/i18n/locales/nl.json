@@ -137,6 +137,11 @@
       "none": "Dit item heeft geen eenmalige code.",
       "unsupported": "Eenmalige codes zijn niet beschikbaar voor dit itemtype.",
       "loadFailed": "De eenmalige code kon niet worden geladen."
+    },
+    "conditionalAccess": {
+      "title": "Waarschuwing",
+      "agree": "Ik ga akkoord",
+      "continue": "Doorgaan"
     }
   },
   "document": {

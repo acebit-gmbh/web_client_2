@@ -32,6 +32,7 @@ import { useSessionWatchdog } from '@/hooks/useSessionWatchdog'
 import { useAutoLock } from '@/hooks/useAutoLock'
 import { useToast } from '@/hooks/useToast'
 import { useDialogTrigger } from '@/hooks/useDialogTrigger'
+import { useEntryBoundDialog } from '@/hooks/useEntryBoundDialog'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { describeApiError } from '@/lib/apiErrors'
 import { useCreateEntry, useUpdateEntry, useDeleteEntry, useMoveEntry } from '@/hooks/mutations/useEntryMutations'
@@ -96,7 +97,6 @@ export default function VaultPage() {
   // captures the trigger element so focus returns to it on close.
   const newEntryDialog = useDialogTrigger()
   const [newEntryType, setNewEntryType] = useState<EntryType>('password')
-  const editEntryDialog = useDialogTrigger()
   const moveEntryDialog = useDialogTrigger()
   const [showDeleteEntry, setShowDeleteEntry] = useState(false)
   const newFolderDialog = useDialogTrigger()
@@ -119,6 +119,11 @@ export default function VaultPage() {
     selectEntry,
     openRecycleBin,
   } = useNavigationStore()
+
+  // The edit form belongs to the entry it was opened for: a Cancel on a
+  // warning or second-password prompt deselects the entry, which closes it,
+  // and it never reads another entry - whose own warning is not answered yet.
+  const editEntryDialog = useEntryBoundDialog(selectedEntryId)
 
   const {
     data: databasesResponse,
@@ -167,11 +172,7 @@ export default function VaultPage() {
   )
 
   // Fetch full entry for editing (with second password if needed)
-  const { data: editingEntry } = useEntry(
-    currentDatabaseId,
-    editEntryDialog.isOpen ? selectedEntryId : null,
-    selectedSecondPassword,
-  )
+  const { data: editingEntry } = useEntry(currentDatabaseId, editEntryDialog.entryId, selectedSecondPassword)
 
   // Register vault props with AppBar
   useVaultAppBar({

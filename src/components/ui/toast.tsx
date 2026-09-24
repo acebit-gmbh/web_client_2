@@ -61,7 +61,7 @@ function ToastItem({ toast }: { toast: ToastModel }) {
       <VariantIcon variant={toast.variant} />
       <div className="flex-1 space-y-0.5 text-sm">
         {toast.title && <div className="font-medium">{toast.title}</div>}
-        <div className="text-muted-foreground">{toast.message}</div>
+        <div className="text-muted-foreground whitespace-pre-line">{toast.message}</div>
       </div>
       <button
         type="button"

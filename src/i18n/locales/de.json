@@ -137,6 +137,11 @@
       "none": "Dieser Eintrag hat keinen Einmalcode.",
       "unsupported": "Für diesen Eintragstyp sind keine Einmalcodes verfügbar.",
       "loadFailed": "Der Einmalcode konnte nicht geladen werden."
+    },
+    "conditionalAccess": {
+      "title": "Warnung",
+      "agree": "Ich stimme zu",
+      "continue": "Fortfahren"
     }
   },
   "document": {

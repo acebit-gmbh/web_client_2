@@ -137,6 +137,11 @@
       "none": "Esta entrada no tiene código de un solo uso.",
       "unsupported": "Los códigos de un solo uso no están disponibles para este tipo de entrada.",
       "loadFailed": "No se pudo cargar el código de un solo uso."
+    },
+    "conditionalAccess": {
+      "title": "Advertencia",
+      "agree": "Acepto",
+      "continue": "Continuar"
     }
   },
   "document": {

@@ -137,6 +137,11 @@
       "none": "Cette entrée n'a pas de code à usage unique.",
       "unsupported": "Les codes à usage unique ne sont pas disponibles pour ce type d'entrée.",
       "loadFailed": "Le code à usage unique n'a pas pu être chargé."
+    },
+    "conditionalAccess": {
+      "title": "Avertissement",
+      "agree": "J'accepte",
+      "continue": "Continuer"
     }
   },
   "document": {

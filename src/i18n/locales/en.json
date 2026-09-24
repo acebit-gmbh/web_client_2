@@ -137,6 +137,11 @@
       "none": "This entry has no one-time code.",
       "unsupported": "One-time codes are not available for this entry type.",
       "loadFailed": "The one-time code could not be loaded."
+    },
+    "conditionalAccess": {
+      "title": "Warning",
+      "agree": "I agree",
+      "continue": "Continue"
     }
   },
   "document": {

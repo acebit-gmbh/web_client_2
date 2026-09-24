@@ -1,12 +1,15 @@
-import { memo, useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowUpDown, ArrowUp, ArrowDown, Lock, KeyRound, Folder as FolderIcon, ExternalLink } from 'lucide-react'
 import { EntryIcon } from './EntryIcon'
+import { ConditionalAccessPrompt } from './ConditionalAccessPrompt'
 import { useSortedItems, type SortField, type SortConfig } from '@/hooks/useSortedItems'
+import { useToast } from '@/hooks/useToast'
 import { formatRelativeDate } from '@/lib/dates'
 import { getSafeHref, openSafeUrl } from '@/lib/url'
+import { isBlockingWarning, warningIdentity, warningMessageText } from '@/lib/conditionalAccess'
 import { useOptionsStore } from '@/stores/optionsStore'
-import type { CompactItem } from '@/api/types'
+import type { CompactItem, EntryCompact, EntryWarning } from '@/api/types'
 import { isFolder } from '@/api/types'
 
 interface EntryListProps {
@@ -36,6 +39,7 @@ interface EntryRowProps {
   openUrlLabel: string
   onFolderClick: (folderId: string, folderName?: string) => void
   onEntryClick: (entryId: string) => void
+  onOpenUrl: (entry: EntryCompact) => void
 }
 
 const EntryRow = memo(function EntryRow({
@@ -45,6 +49,7 @@ const EntryRow = memo(function EntryRow({
   openUrlLabel,
   onFolderClick,
   onEntryClick,
+  onOpenUrl,
 }: EntryRowProps) {
   const { t } = useTranslation()
   const folder = isFolder(item)
@@ -104,7 +109,7 @@ const EntryRow = memo(function EntryRow({
                 className="pointer-events-none shrink-0 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation()
-                  openSafeUrl(item.url)
+                  onOpenUrl(item)
                 }}
               >
                 <ExternalLink className="h-3 w-3" />
@@ -146,6 +151,33 @@ export function EntryList({ items, selectedEntryId, onFolderClick, onEntryClick 
     [],
   )
   const stableEntryClick = useCallback((entryId: string) => onEntryClickRef.current(entryId), [])
+
+  // Conditional access (Server 20.0.0+): the row's open-URL icon is the one
+  // way to use an entry without opening its detail, so the warning is shown
+  // here too. A confirm or verify warning opens nothing until it is answered;
+  // an info warning is shown as it opens (sticky - the new tab takes the
+  // focus, and a toast that timed out behind it would never be read).
+  const toast = useToast()
+  const [urlPrompt, setUrlPrompt] = useState<{ entry: EntryCompact; warning: EntryWarning } | null>(
+    null,
+  )
+  const handleOpenUrl = useCallback(
+    (entry: EntryCompact) => {
+      const warning = entry.warning
+      if (isBlockingWarning(warning)) {
+        setUrlPrompt({ entry, warning })
+        return
+      }
+      if (warning) {
+        toast.warning(warningMessageText(warning), {
+          title: t('entry.conditionalAccess.title'),
+          duration: 0,
+        })
+      }
+      openSafeUrl(entry.url)
+    },
+    [toast, t],
+  )
 
   function handleSort(field: SortField) {
     setSortConfig({
@@ -231,10 +263,25 @@ export function EntryList({ items, selectedEntryId, onFolderClick, onEntryClick 
               openUrlLabel={openUrlLabel}
               onFolderClick={stableFolderClick}
               onEntryClick={stableEntryClick}
+              onOpenUrl={handleOpenUrl}
             />
           )
         })}
       </div>
+
+      {urlPrompt && (
+        <ConditionalAccessPrompt
+          key={`${urlPrompt.entry.id}:${warningIdentity(urlPrompt.warning)}`}
+          warning={urlPrompt.warning}
+          entryName={urlPrompt.entry.name}
+          entryType={t(`entryType.${urlPrompt.entry.type}`)}
+          onConfirm={() => {
+            setUrlPrompt(null)
+            openSafeUrl(urlPrompt.entry.url)
+          }}
+          onCancel={() => setUrlPrompt(null)}
+        />
+      )}
     </div>
   )
 }
