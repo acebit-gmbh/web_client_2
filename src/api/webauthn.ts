@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { WEB_CLIENT_IDENTITY } from './clientIdentity'
 import type { LoginResponse } from './types'
 
 export interface WebAuthnBeginResponse {
@@ -29,7 +30,7 @@ export function webauthnBegin(
 ): Promise<WebAuthnBeginResponse> {
   return apiClient<WebAuthnBeginResponse>('/auth/webauthn/begin', {
     method: 'POST',
-    body: JSON.stringify({ user, scope }),
+    body: JSON.stringify({ user, scope, client: WEB_CLIENT_IDENTITY }),
     skipAuth: true,
   })
 }

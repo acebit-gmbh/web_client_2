@@ -139,6 +139,7 @@ describe('uploadDocument', () => {
     expect(xhr.method).toBe('PUT')
     expect(xhr.url).toBe('https://pd.example.com:8714/v2.0/databases/d/entries/e/content')
     expect(xhr.headers.Authorization).toBe('Bearer test-token')
+    expect(xhr.headers).not.toHaveProperty('X-PD-Client')
     expect(xhr.sent).toBeInstanceOf(File)
 
     xhr.status = 200
@@ -251,6 +252,7 @@ describe('certificate content requests', () => {
       const xhr = FakeXhr.last!
       expect(xhr.url).toBe(`/v2.0/databases/db/entries/cert/content?part=${part}`)
       expect(xhr.headers['X-Second-Password']).toBe(btoa('secret'))
+      expect(xhr.headers).not.toHaveProperty('X-PD-Client')
       expect(xhr.sent).toBe(file)
       xhr.status = 200
       xhr.responseText = JSON.stringify({ id: 'cert', type: 'certificate' })

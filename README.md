@@ -366,6 +366,7 @@ Full API documentation: **https://github.com/acebit-gmbh/pd_rest_api** (also pub
 
 ### API Constraints
 
+- **Client identification** -- sign-in and WebAuthn begin requests include `client: {platform: "web", version: "<package.json version>"}` in their JSON body. Server 20 binds the platform to the resulting challenge and session; Server 19 ignores the optional object. The client sends no `X-PD-Client` header, preserving older servers' CORS compatibility. No separate build identifier is available.
 - **Certificates have two attachments** -- `certificate.pass` is editable; public/private attachment descriptors and parsed subject, issuer, validity and SHA-256 thumbprint are read-only. Upload or download one attachment with `/entries/{id}/content?part=public|private`, forwarding any second password. Encrypted File entries instead carry `encrypted_file.pass` and `files: [{name, path}]`: `path` is the containing folder, not a file-transfer URL. Their create/edit form only changes these stored references. Neither type supports one-time codes.
 - **No flat entry list** -- browsing is exclusively via `/children` endpoints (folder tree navigation)
 - **No server-side sorting** -- the client implements sorting locally

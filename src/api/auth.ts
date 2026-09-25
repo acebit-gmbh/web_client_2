@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { WEB_CLIENT_IDENTITY } from './clientIdentity'
 import type {
   LoginRequest,
   LoginResponse,
@@ -17,7 +18,7 @@ export function login(data: LoginRequest): Promise<LoginResponse> {
 
   return apiClient<LoginResponse>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, client: WEB_CLIENT_IDENTITY }),
     skipAuth: true,
     credentials: isNegotiate ? 'include' : undefined,
   })
