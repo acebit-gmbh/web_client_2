@@ -142,6 +142,14 @@
       "title": "Advertencia",
       "agree": "Acepto",
       "continue": "Continuar"
+    },
+    "unsupportedType": "Este tipo de entrada no es compatible con el cliente web.",
+    "certificate": {
+      "subject": "Sujeto",
+      "issuer": "Emisor",
+      "validFrom": "Válido desde",
+      "validTo": "Válido hasta",
+      "thumbprint": "Huella digital"
     }
   },
   "document": {
@@ -277,7 +285,9 @@
     "teamviewer": "TeamViewer",
     "passkey": "Passkey",
     "custom": "Personalizado",
-    "folder": "Carpeta"
+    "folder": "Carpeta",
+    "encrypted_file": "Archivo cifrado",
+    "certificate": "Certificado"
   },
   "entryForm": {
     "createTitle": "Nueva entrada",
@@ -509,5 +519,21 @@
     "deletedByYou": "eliminado por usted",
     "loadFailed": "No se ha podido cargar la papelera.",
     "truncatedNotice": "Se muestran los primeros {{count}} elementos de la papelera."
+  },
+  "fileEntry": {
+    "downloadWarningTitle": "Descargar archivo confidencial",
+    "downloadWarningDesc": "Este archivo se guardará fuera de su base de datos de Password Depot. Guárdelo en un lugar seguro y elimínelo de su dispositivo cuando ya no lo necesite.",
+    "certificateEditHint": "Guarde la entrada y después cargue el certificado público y la clave privada por separado desde sus detalles. Los detalles del certificado son de solo lectura.",
+    "references": "Referencias a archivos",
+    "referencesHint": "Estas son referencias a archivos en otro equipo. El cliente web puede editar las referencias, pero no puede abrir, cargar, descargar, cifrar ni descifrar esos archivos.",
+    "path": "Carpeta",
+    "addReference": "Añadir referencia",
+    "removeReference": "Eliminar referencia",
+    "publicKey": "Certificado público",
+    "privateKey": "Clave privada",
+    "noAttachment": "No hay ningún archivo adjunto.",
+    "downloadPart": "Descargar {{part}}",
+    "uploadPart": "Cargar {{part}}",
+    "replacePart": "Reemplazar {{part}}"
   }
 }

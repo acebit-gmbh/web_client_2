@@ -72,6 +72,9 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
   const secondPassword = useSecondPasswordStore((s) => s.getSecondPassword(entryId ?? ''))
   const setSecondPassword = useSecondPasswordStore((s) => s.setSecondPassword)
   const clearSecondPassword = useSecondPasswordStore((s) => s.clearSecondPassword)
+  // A link can require its target's password even when its own compact flag is false.
+  // Keep an observed requirement when a rejected cached password is cleared.
+  const [secondPasswordRequiredFor, setSecondPasswordRequiredFor] = useState<string | null>(null)
 
   // Conditional access (Server 20.0.0+). A confirm or verify warning is
   // answered BEFORE anything reads the entry: before useEntry, and before the
@@ -83,7 +86,8 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
   const listedWarning = compactEntry?.warning
   const mustAnswerListed = needsAnswer(listedWarning, answeredWarnings)
 
-  const needsSecondPassword = !!compactEntry?.has_second_pass && !secondPassword
+  const needsSecondPassword =
+    (!!compactEntry?.has_second_pass || (!!entryId && secondPasswordRequiredFor === entryId)) && !secondPassword
   const { data: entry, isLoading, error, refetch } = useEntry(
     dbId,
     needsSecondPassword || mustAnswerListed ? null : entryId,
@@ -103,15 +107,17 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
   // which unmounts this component). It waits for the warning to be answered.
   const showSecondPasswordPrompt = needsSecondPassword && !warningToAnswer
 
-  // Defensive: if a cached password is rejected later in the session (the
-  // server-side second-password cache can expire independently), clear it and
-  // drop the errored cache entry — clearing the stored password flips
-  // needsSecondPassword back on, which re-opens the prompt automatically.
+  // A protected link target may first reveal its password requirement here.
+  // Remember it and drop any rejected cached password and errored query, so
+  // the prompt also reopens if the server's second-password cache expires.
   // Only 4031 means "wrong second password" (19.x and 20.x alike); a plain
   // 403 (no permission, sealed) must not throw the password away and re-ask.
   const apiError = error as ApiError | null
   const isWrongPassword =
-    apiError?.status === 403 && apiError.code === ERRCODE_INVALID_SECOND_PASS && !!secondPassword
+    apiError?.status === 403 && apiError.code === ERRCODE_INVALID_SECOND_PASS
+  if (isWrongPassword && entryId && secondPasswordRequiredFor !== entryId) {
+    setSecondPasswordRequiredFor(entryId)
+  }
   useEffect(() => {
     if (isWrongPassword && entryId) {
       clearSecondPassword(entryId)
@@ -153,6 +159,7 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
     entry?.credit_card || entry?.license || entry?.identity ||
     entry?.information?.text || entry?.banking || entry?.rdp ||
     entry?.putty || entry?.teamviewer || entry?.document ||
+    entry?.encrypted_file || entry?.certificate ||
     entry?.passkey || entry?.has_otp ||
     (entry?.custom_fields && entry.custom_fields.length > 0))
 

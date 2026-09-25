@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { ApiError, UploadInterruptedError, configureApi, type ApiBindings } from './client'
-import { getEntryOtp, uploadDocument } from './entries'
+import { getEntryOtp, uploadDocument, downloadDocument } from './entries'
 
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), {
@@ -182,4 +182,104 @@ describe('uploadDocument', () => {
     expect(err).toBeInstanceOf(DOMException)
     expect((err as DOMException).name).toBe('AbortError')
   })
+})
+
+// ES-1003: binary transfers stay on /content and choose the certificate slot
+// explicitly. No encrypted-file path is ever an HTTP request target.
+describe('certificate content requests', () => {
+  const fetchMock = vi.fn()
+  const onActivity = vi.fn()
+  const onAuthFailure = vi.fn()
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('XMLHttpRequest', FakeXhr)
+    configureApi({
+      getContext: () => ({ serverOrigin: '', token: 'test-token' }),
+      onActivity,
+      onAuthFailure,
+    })
+  })
+
+  it.each(['public', 'private'] as const)(
+    'downloads only the %s certificate slot with the second password',
+    async (part) => {
+      fetchMock.mockResolvedValueOnce(
+        new Response('opaque bytes', {
+          headers: { 'Content-Disposition': 'attachment; filename="key.pem"' },
+        }),
+      )
+      const result = await downloadDocument('db', 'cert', 'secret', part)
+      expect(result.filename).toBe('key.pem')
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/v2.0/databases/db/entries/cert/content?part=${part}`,
+        expect.objectContaining({
+          cache: 'no-store',
+          headers: { Authorization: 'Bearer test-token', 'X-Second-Password': btoa('secret') },
+        }),
+      )
+      expect(onActivity).toHaveBeenCalledOnce()
+    },
+  )
+
+  it('keeps document URLs unchanged and omits an absent second password', async () => {
+    fetchMock.mockResolvedValueOnce(new Response('document'))
+    await downloadDocument('db', 'doc')
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/v2.0/databases/db/entries/doc/content',
+      expect.objectContaining({ headers: { Authorization: 'Bearer test-token' } }),
+    )
+  })
+
+  it('preserves a protected-content refusal and never treats it as a download', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ error: { code: 4031, message: 'Wrong second password' } }, { status: 403 }),
+    )
+    await expect(downloadDocument('db', 'cert', 'wrong', 'private')).rejects.toMatchObject({
+      status: 403,
+      code: 4031,
+    })
+    expect(onActivity).not.toHaveBeenCalled()
+    expect(onAuthFailure).not.toHaveBeenCalled()
+  })
+
+  it.each(['public', 'private'] as const)(
+    'uploads %s as opaque bytes without changing the other slot',
+    async (part) => {
+      const file = new File(['opaque bytes'], 'key.pem', { type: 'application/octet-stream' })
+      const promise = uploadDocument('db', 'cert', file, { part, secondPassword: 'secret' })
+      const xhr = FakeXhr.last!
+      expect(xhr.url).toBe(`/v2.0/databases/db/entries/cert/content?part=${part}`)
+      expect(xhr.headers['X-Second-Password']).toBe(btoa('secret'))
+      expect(xhr.sent).toBe(file)
+      xhr.status = 200
+      xhr.responseText = JSON.stringify({ id: 'cert', type: 'certificate' })
+      xhr.onload!()
+      await expect(promise).resolves.toMatchObject({ type: 'certificate' })
+    },
+  )
+
+  it('rejects an already-cancelled transfer without sending bytes', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    await expect(
+      uploadDocument('db', 'cert', new File(['bytes'], 'key.pem'), {
+        part: 'private',
+        signal: controller.signal,
+      }),
+    ).rejects.toMatchObject({ name: 'AbortError' })
+    expect(FakeXhr.last!.sent).toBeUndefined()
+  })
+})
+
+it('encodes a Unicode second password for binary downloads', async () => {
+  const fetchMock = vi.fn().mockResolvedValueOnce(new Response('bytes'))
+  vi.stubGlobal('fetch', fetchMock)
+  configureApi({
+    getContext: () => ({ serverOrigin: '', token: null }),
+    onActivity: vi.fn(),
+    onAuthFailure: vi.fn(),
+  })
+  await downloadDocument('db', 'cert', 'päss', 'private')
+  expect(fetchMock.mock.calls[0][1].headers['X-Second-Password']).toBe('cMOkc3M=')
 })

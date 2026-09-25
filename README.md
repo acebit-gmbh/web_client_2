@@ -10,7 +10,8 @@ The web client provides browser-based access to Password Depot vaults with suppo
 
 - **Vault browsing** -- folder tree navigation, entry list with sorting, detail panel
 - **Full CRUD** -- create, edit, move, and delete entries and folders
-- **12 entry types** -- password, credit card, license, identity, information, banking, document, RDP, PuTTY, TeamViewer, custom, passkey (custom entries render with the password layout)
+- **14 entry types** -- password, credit card, license, identity, information, banking, document, encrypted file, certificate, RDP, PuTTY, TeamViewer, custom, passkey (custom entries render with the password layout)
+- **Certificates and encrypted-file references** -- view certificate details, manage public and private attachments separately, and edit encrypted-file passwords and references (Server 20.0.0+). Referenced local files remain on their original computer and cannot be transferred or encrypted by the web client.
 - **Document management** -- upload and download file attachments (up to 64 MB)
 - **Search** -- full-text search across entries
 - **6 authentication methods** -- Standard, SSPI, Windows SSO (Negotiate), Passkey (WebAuthn), OIDC, Azure AD
@@ -365,6 +366,7 @@ Full API documentation: **https://github.com/acebit-gmbh/pd_rest_api** (also pub
 
 ### API Constraints
 
+- **Certificates have two attachments** -- `certificate.pass` is editable; public/private attachment descriptors and parsed subject, issuer, validity and SHA-256 thumbprint are read-only. Upload or download one attachment with `/entries/{id}/content?part=public|private`, forwarding any second password. Encrypted File entries instead carry `encrypted_file.pass` and `files: [{name, path}]`: `path` is the containing folder, not a file-transfer URL. Their create/edit form only changes these stored references. Neither type supports one-time codes.
 - **No flat entry list** -- browsing is exclusively via `/children` endpoints (folder tree navigation)
 - **No server-side sorting** -- the client implements sorting locally
 - **Compact vs. full representations** -- list endpoints return compact objects (no passwords); detail endpoints return full objects

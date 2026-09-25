@@ -142,6 +142,14 @@
       "title": "Avertissement",
       "agree": "J'accepte",
       "continue": "Continuer"
+    },
+    "unsupportedType": "Ce type d’entrée n’est pas pris en charge dans le client Web.",
+    "certificate": {
+      "subject": "Sujet",
+      "issuer": "Émetteur",
+      "validFrom": "Valide à partir du",
+      "validTo": "Valide jusqu’au",
+      "thumbprint": "Empreinte"
     }
   },
   "document": {
@@ -277,7 +285,9 @@
     "teamviewer": "TeamViewer",
     "passkey": "Passkey",
     "custom": "Personnalisé",
-    "folder": "Dossier"
+    "folder": "Dossier",
+    "encrypted_file": "Fichier chiffré",
+    "certificate": "Certificat"
   },
   "entryForm": {
     "createTitle": "Nouvelle entrée",
@@ -509,5 +519,21 @@
     "deletedByYou": "supprimé par vous",
     "loadFailed": "La corbeille n’a pas pu être chargée.",
     "truncatedNotice": "Affichage des {{count}} premiers éléments de la corbeille."
+  },
+  "fileEntry": {
+    "downloadWarningTitle": "Télécharger un fichier confidentiel",
+    "downloadWarningDesc": "Ce fichier sera enregistré en dehors de votre base de données Password Depot. Conservez-le en lieu sûr et supprimez-le de votre appareil lorsque vous n’en avez plus besoin.",
+    "certificateEditHint": "Enregistrez l’entrée, puis chargez séparément le certificat public et la clé privée depuis ses détails. Les détails du certificat sont en lecture seule.",
+    "references": "Références de fichiers",
+    "referencesHint": "Il s’agit de références à des fichiers sur un autre ordinateur. Le client Web peut modifier les références, mais ne peut pas ouvrir, charger, télécharger, chiffrer ou déchiffrer ces fichiers.",
+    "path": "Dossier",
+    "addReference": "Ajouter une référence",
+    "removeReference": "Supprimer la référence",
+    "publicKey": "Certificat public",
+    "privateKey": "Clé privée",
+    "noAttachment": "Aucun fichier joint.",
+    "downloadPart": "Télécharger : {{part}}",
+    "uploadPart": "Charger : {{part}}",
+    "replacePart": "Remplacer : {{part}}"
   }
 }

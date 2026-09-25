@@ -142,6 +142,14 @@
       "title": "Warnung",
       "agree": "Ich stimme zu",
       "continue": "Fortfahren"
+    },
+    "unsupportedType": "Dieser Eintragstyp wird im Web-Client nicht unterstützt.",
+    "certificate": {
+      "subject": "Betreff",
+      "issuer": "Aussteller",
+      "validFrom": "Gültig ab",
+      "validTo": "Gültig bis",
+      "thumbprint": "Fingerabdruck"
     }
   },
   "document": {
@@ -277,7 +285,9 @@
     "teamviewer": "TeamViewer",
     "passkey": "Passkey",
     "custom": "Benutzerdefiniert",
-    "folder": "Ordner"
+    "folder": "Ordner",
+    "encrypted_file": "Verschlüsselte Datei",
+    "certificate": "Zertifikat"
   },
   "entryForm": {
     "createTitle": "Neuer Eintrag",
@@ -509,5 +519,21 @@
     "deletedByYou": "von Ihnen gelöscht",
     "loadFailed": "Der Papierkorb konnte nicht geladen werden.",
     "truncatedNotice": "Es werden die ersten {{count}} Elemente des Papierkorbs angezeigt."
+  },
+  "fileEntry": {
+    "downloadWarningTitle": "Vertrauliche Datei herunterladen",
+    "downloadWarningDesc": "Diese Datei wird außerhalb Ihrer Password Depot-Datenbank gespeichert. Bewahren Sie sie sicher auf und löschen Sie sie von Ihrem Gerät, wenn Sie sie nicht mehr benötigen.",
+    "certificateEditHint": "Speichern Sie den Eintrag und laden Sie anschließend das öffentliche Zertifikat und den privaten Schlüssel getrennt in der Detailansicht hoch. Zertifikatdetails sind schreibgeschützt.",
+    "references": "Dateiverweise",
+    "referencesHint": "Dies sind Verweise auf Dateien auf einem anderen Computer. Der Web-Client kann die Verweise bearbeiten, diese Dateien aber nicht öffnen, hochladen, herunterladen, verschlüsseln oder entschlüsseln.",
+    "path": "Ordner",
+    "addReference": "Verweis hinzufügen",
+    "removeReference": "Verweis entfernen",
+    "publicKey": "Öffentliches Zertifikat",
+    "privateKey": "Privater Schlüssel",
+    "noAttachment": "Keine Datei angehängt.",
+    "downloadPart": "{{part}} herunterladen",
+    "uploadPart": "{{part}} hochladen",
+    "replacePart": "{{part}} ersetzen"
   }
 }

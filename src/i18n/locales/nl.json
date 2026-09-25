@@ -142,6 +142,14 @@
       "title": "Waarschuwing",
       "agree": "Ik ga akkoord",
       "continue": "Doorgaan"
+    },
+    "unsupportedType": "Dit type item wordt niet ondersteund in de webclient.",
+    "certificate": {
+      "subject": "Onderwerp",
+      "issuer": "Uitgever",
+      "validFrom": "Geldig vanaf",
+      "validTo": "Geldig tot",
+      "thumbprint": "Vingerafdruk"
     }
   },
   "document": {
@@ -277,7 +285,9 @@
     "teamviewer": "TeamViewer",
     "passkey": "Passkey",
     "custom": "Aangepast",
-    "folder": "Map"
+    "folder": "Map",
+    "encrypted_file": "Versleuteld bestand",
+    "certificate": "Certificaat"
   },
   "entryForm": {
     "createTitle": "Nieuw item",
@@ -509,5 +519,21 @@
     "deletedByYou": "door u verwijderd",
     "loadFailed": "De prullenbak kon niet worden geladen.",
     "truncatedNotice": "De eerste {{count}} items van de prullenbak worden weergegeven."
+  },
+  "fileEntry": {
+    "downloadWarningTitle": "Vertrouwelijk bestand downloaden",
+    "downloadWarningDesc": "Dit bestand wordt buiten uw Password Depot-database opgeslagen. Bewaar het veilig en verwijder het van uw apparaat wanneer u het niet meer nodig hebt.",
+    "certificateEditHint": "Sla het item op en upload daarna het openbare certificaat en de privésleutel afzonderlijk vanuit de details. Certificaatgegevens zijn alleen-lezen.",
+    "references": "Bestandsverwijzingen",
+    "referencesHint": "Dit zijn verwijzingen naar bestanden op een andere computer. De webclient kan de verwijzingen bewerken, maar kan die bestanden niet openen, uploaden, downloaden, versleutelen of ontsleutelen.",
+    "path": "Map",
+    "addReference": "Verwijzing toevoegen",
+    "removeReference": "Verwijzing verwijderen",
+    "publicKey": "Openbaar certificaat",
+    "privateKey": "Privésleutel",
+    "noAttachment": "Geen bestand bijgevoegd.",
+    "downloadPart": "{{part}} downloaden",
+    "uploadPart": "{{part}} uploaden",
+    "replacePart": "{{part}} vervangen"
   }
 }

@@ -510,7 +510,19 @@ export default function VaultPage() {
           onClose={newEntryDialog.close}
           defaultType={newEntryType}
           dbId={currentDatabaseId}
-          onSubmit={async (data) => { await createEntryMut.mutateAsync(data) }}
+          onSubmit={async (data) => {
+            const created = await createEntryMut.mutateAsync(data)
+            const navigation = useNavigationStore.getState()
+            if (data.type === 'certificate' &&
+                navigation.currentDatabaseId === currentDatabaseId &&
+                navigation.currentFolderId === currentFolderId &&
+                navigation.selectedEntryId === selectedEntryId && !navigation.recycleBinOpen) {
+              // Reveal the new entry even if a search would exclude its name.
+              // A completed request must not pull the user out of a newer location.
+              setSearchQuery('')
+              selectEntry(created.id)
+            }
+          }}
           isSubmitting={createEntryMut.isPending}
         />
       )}

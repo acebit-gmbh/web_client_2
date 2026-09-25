@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { EntryDetail } from '@/api/types'
 import { PasswordDetail } from './types/PasswordDetail'
 import { CreditCardDetail } from './types/CreditCardDetail'
@@ -6,6 +7,8 @@ import { IdentityDetail } from './types/IdentityDetail'
 import { InformationDetail } from './types/InformationDetail'
 import { BankingDetail } from './types/BankingDetail'
 import { DocumentDetail } from './types/DocumentDetail'
+import { CertificateDetail } from './types/CertificateDetail'
+import { EncryptedFileDetail } from './types/EncryptedFileDetail'
 import { RdpDetail } from './types/RdpDetail'
 import { PuttyDetail } from './types/PuttyDetail'
 import { TeamViewerDetail } from './types/TeamViewerDetail'
@@ -16,6 +19,7 @@ interface EntryTypeRouterProps {
 }
 
 export function EntryTypeRouter({ entry }: EntryTypeRouterProps) {
+  const { t } = useTranslation()
   switch (entry.type) {
     case 'password':
     case 'custom':
@@ -32,6 +36,10 @@ export function EntryTypeRouter({ entry }: EntryTypeRouterProps) {
       return <BankingDetail entry={entry} />
     case 'document':
       return <DocumentDetail entry={entry} />
+    case 'encrypted_file':
+      return <EncryptedFileDetail entry={entry} />
+    case 'certificate':
+      return <CertificateDetail entry={entry} />
     case 'rdp':
       return <RdpDetail entry={entry} />
     case 'putty':
@@ -42,8 +50,8 @@ export function EntryTypeRouter({ entry }: EntryTypeRouterProps) {
       return <PasskeyDetail entry={entry} />
     default:
       return (
-        <div className="py-4 text-center text-sm text-muted-foreground">
-          Entry type not supported in web client.
+        <div className="text-muted-foreground py-4 text-center text-sm">
+          {t('entry.unsupportedType')}
         </div>
       )
   }

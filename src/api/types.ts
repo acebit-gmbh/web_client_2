@@ -240,6 +240,8 @@ export type EntryType =
   | 'information'
   | 'banking'
   | 'document'
+  | 'encrypted_file'
+  | 'certificate'
   | 'rdp'
   | 'putty'
   | 'teamviewer'
@@ -382,6 +384,32 @@ export interface DocumentFields {
   name?: string | null
   type?: string | null
   size?: number
+}
+
+/** Desktop-managed references only: paths are displayed, never fetched by the browser. */
+export interface EncryptedFileReference {
+  name: string
+  /** Directory containing name, as stored by the desktop client. */
+  path: string
+}
+
+export interface EncryptedFileFields {
+  pass?: string
+  files?: EncryptedFileReference[]
+}
+
+export type CertificatePart = 'public' | 'private'
+
+/** Server 20+: only pass is writable in JSON. Attachments use /content?part=public|private. */
+export interface CertificateFields {
+  pass?: string
+  public_key?: DocumentFields | null
+  private_key?: DocumentFields | null
+  subject?: string | null
+  issuer?: string | null
+  valid_from?: string | null
+  valid_to?: string | null
+  thumbprint?: string | null
 }
 
 export interface RdpFields {
@@ -533,6 +561,8 @@ export interface EntryDetail {
   information?: InformationFields
   banking?: BankingFields
   document?: DocumentFields
+  encrypted_file?: EncryptedFileFields
+  certificate?: CertificateFields
   rdp?: RdpFields
   putty?: PuttyFields
   teamviewer?: TeamViewerFields
@@ -598,6 +628,8 @@ export interface CreateEntryRequest {
   /** Server 20.0.0+: one-time-code settings; `null` is accepted as a no-op here. */
   totp?: TotpWrite | null
   // Type-specific sub-objects
+  encrypted_file?: EncryptedFileFields
+  certificate?: Pick<CertificateFields, 'pass'>
   credit_card?: CreditCardFields
   license?: LicenseFields
   identity?: IdentityFields
@@ -627,6 +659,8 @@ export interface UpdateEntryRequest {
   /** Server 20.0.0+: one-time-code settings; absent = untouched, `null` = remove. */
   totp?: TotpWrite | null
   // Type-specific sub-objects
+  encrypted_file?: EncryptedFileFields
+  certificate?: Pick<CertificateFields, 'pass'>
   credit_card?: CreditCardFields
   license?: LicenseFields
   identity?: IdentityFields

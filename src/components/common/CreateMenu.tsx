@@ -19,6 +19,8 @@ const ENTRY_TYPES: { type: EntryType; labelKey: string }[] = [
   { type: 'information', labelKey: 'entryType.information' },
   { type: 'banking', labelKey: 'entryType.banking' },
   { type: 'document', labelKey: 'entryType.document' },
+  { type: 'encrypted_file', labelKey: 'entryType.encrypted_file' },
+  { type: 'certificate', labelKey: 'entryType.certificate' },
   { type: 'rdp', labelKey: 'entryType.rdp' },
   { type: 'putty', labelKey: 'entryType.putty' },
   { type: 'teamviewer', labelKey: 'entryType.teamviewer' },
@@ -56,7 +58,7 @@ export function CreateMenu({ onNewFolder, onNewEntry, onNewDocument }: CreateMen
         {ENTRY_TYPES.map(({ type, labelKey }) => (
           <DropdownMenuItem
             key={type}
-            onClick={() => type === 'document' ? onNewDocument() : onNewEntry(type)}
+            onClick={() => (type === 'document' ? onNewDocument() : onNewEntry(type))}
             className="gap-2"
           >
             <EntryIcon type={type} className="h-4 w-4" />

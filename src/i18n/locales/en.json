@@ -142,6 +142,14 @@
       "title": "Warning",
       "agree": "I agree",
       "continue": "Continue"
+    },
+    "unsupportedType": "Entry type not supported in the web client.",
+    "certificate": {
+      "subject": "Subject",
+      "issuer": "Issuer",
+      "validFrom": "Valid From",
+      "validTo": "Valid To",
+      "thumbprint": "Thumbprint"
     }
   },
   "document": {
@@ -277,7 +285,9 @@
     "teamviewer": "TeamViewer",
     "passkey": "Passkey",
     "custom": "Custom",
-    "folder": "Folder"
+    "folder": "Folder",
+    "encrypted_file": "Encrypted File",
+    "certificate": "Certificate"
   },
   "entryForm": {
     "createTitle": "New Entry",
@@ -509,5 +519,21 @@
     "deletedByYou": "deleted by you",
     "loadFailed": "The recycle bin could not be loaded.",
     "truncatedNotice": "Showing the first {{count}} items of the recycle bin."
+  },
+  "fileEntry": {
+    "downloadWarningTitle": "Download Confidential File",
+    "downloadWarningDesc": "This file will be saved outside your Password Depot database. Store it securely and delete it from your device when you no longer need it.",
+    "certificateEditHint": "Save the entry, then upload the public certificate and private key separately from its details. Certificate details are read-only.",
+    "references": "File references",
+    "referencesHint": "These are references to files on another computer. The web client can edit the references, but cannot open, upload, download, encrypt or decrypt those files.",
+    "path": "Folder",
+    "addReference": "Add reference",
+    "removeReference": "Remove reference",
+    "publicKey": "Public certificate",
+    "privateKey": "Private key",
+    "noAttachment": "No file attached.",
+    "downloadPart": "Download {{part}}",
+    "uploadPart": "Upload {{part}}",
+    "replacePart": "Replace {{part}}"
   }
 }

@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PasswordGenerator } from '@/components/common/PasswordGenerator'
 import { TotpSection } from './TotpSection'
+import { CertificateMetadata } from './types/FileMetadata'
 import { IconPicker, type IconPickerHandle } from '@/components/icons/IconPicker'
 import { useTotpCapability } from '@/hooks/useTotpCapability'
 import { useIconCapability } from '@/hooks/useIconCapability'
@@ -123,6 +124,15 @@ export function EntryFormDialog({
   const [rdp, setRdp] = useState(entry?.rdp ?? {})
   const [putty, setPutty] = useState(entry?.putty ?? {})
   const [teamviewer, setTeamviewer] = useState(entry?.teamviewer ?? {})
+
+  const [filePass, setFilePass] = useState(
+    entry?.certificate?.pass ?? entry?.encrypted_file?.pass ?? '',
+  )
+  const [filePassChanged, setFilePassChanged] = useState(false)
+  const [fileReferences, setFileReferences] = useState(entry?.encrypted_file?.files ?? [])
+  const [fileReferencesChanged, setFileReferencesChanged] = useState(false)
+  const filePassId = useId()
+  const fileReferencesId = useId()
 
   // One-time code (Server 20.0.0+). The editor is invisible unless the server
   // has shown that it accepts the `totp` key: on edit the loaded entry carries
@@ -272,6 +282,16 @@ export function EntryFormDialog({
         Object.assign(base, { putty: puttyPayload })
       }
       if (type === 'teamviewer') Object.assign(base, { teamviewer })
+      // Hidden or untouched secrets/references must not be cleared by a common-field edit.
+      if (type === 'certificate' && !isLinked && (!isEditing || filePassChanged)) {
+        base.certificate = { pass: filePass }
+      }
+      if (type === 'encrypted_file' && !isLinked) {
+        const fields: NonNullable<CreateEntryRequest['encrypted_file']> = {}
+        if (!isEditing || filePassChanged) fields.pass = filePass
+        if (!isEditing || fileReferencesChanged) fields.files = fileReferences
+        if (Object.keys(fields).length > 0) base.encrypted_file = fields
+      }
     }
 
     if (totpWrite !== undefined) {
@@ -528,6 +548,93 @@ export function EntryFormDialog({
               { key: 'partner_id', label: t('entry.partnerId') },
               { key: 'pass', label: t('entry.password'), type: 'password' },
             ]} />
+          )}
+
+          {(type === 'certificate' || type === 'encrypted_file') && (
+            <div className="space-y-2">
+              <Label htmlFor={filePassId}>{t('entry.password')}</Label>
+              <Input
+                id={filePassId}
+                type="password"
+                value={filePass}
+                disabled={isLinked}
+                readOnly={isLinked}
+                autoComplete="new-password"
+                onChange={(e) => {
+                  setFilePass(e.target.value)
+                  setFilePassChanged(true)
+                }}
+              />
+            </div>
+          )}
+
+          {type === 'certificate' && (
+            <>
+              {entry?.certificate && <CertificateMetadata certificate={entry.certificate} />}
+              <p className="text-muted-foreground text-xs">{t(isLinked ? 'entryForm.linkedNotice' : 'fileEntry.certificateEditHint')}</p>
+            </>
+          )}
+
+          {type === 'encrypted_file' && (
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-medium">{t('fileEntry.references')}</legend>
+              <p className="text-muted-foreground text-xs">{t('fileEntry.referencesHint')}</p>
+              {fileReferences.map((file, index) => (
+                <div key={index} className="space-y-2 rounded-md border p-3">
+                  <Label htmlFor={`${fileReferencesId}-name-${index}`}>{t('entry.fileName')}</Label>
+                  <Input
+                    id={`${fileReferencesId}-name-${index}`}
+                    value={file.name}
+                    disabled={isLinked}
+                    readOnly={isLinked}
+                    onChange={(e) => {
+                      setFileReferences((files) =>
+                        files.map((f, i) => (i === index ? { ...f, name: e.target.value } : f)),
+                      )
+                      setFileReferencesChanged(true)
+                    }}
+                  />
+                  <Label htmlFor={`${fileReferencesId}-path-${index}`}>{t('fileEntry.path')}</Label>
+                  <Input
+                    id={`${fileReferencesId}-path-${index}`}
+                    value={file.path}
+                    disabled={isLinked}
+                    readOnly={isLinked}
+                    onChange={(e) => {
+                      setFileReferences((files) =>
+                        files.map((f, i) => (i === index ? { ...f, path: e.target.value } : f)),
+                      )
+                      setFileReferencesChanged(true)
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isLinked}
+                    onClick={() => {
+                      setFileReferences((files) => files.filter((_, i) => i !== index))
+                      setFileReferencesChanged(true)
+                    }}
+                  >
+                    {t('fileEntry.removeReference')}
+                  </Button>
+                </div>
+              ))}
+              {!isLinked && (!isEditing || entry?.encrypted_file?.files !== undefined) && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFileReferences((files) => [...files, { name: '', path: '' }])
+                    setFileReferencesChanged(true)
+                  }}
+                >
+                  {t('fileEntry.addReference')}
+                </Button>
+              )}
+            </fieldset>
           )}
 
           {/* One-time code (Server 20.0.0+) — only when the server has shown it accepts it */}

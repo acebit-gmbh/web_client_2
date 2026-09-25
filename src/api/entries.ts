@@ -1,3 +1,4 @@
+import { toBase64 } from '@/lib/base64'
 import {
   apiClient,
   ApiError,
@@ -15,6 +16,7 @@ import type {
   UpdateEntryRequest,
   MoveRequest,
   ApiErrorResponse,
+  CertificatePart,
 } from './types'
 
 /**
@@ -23,13 +25,11 @@ import type {
  * code point > U+00FF (CJK, Cyrillic, en-dash, curly quotes — all common in
  * real filenames), which would otherwise reject the whole upload. We emit an
  * ASCII-only `filename="..."` (with quotes/backslashes/control chars stripped)
- * for the server's simple parser, plus an RFC 5987 `filename*` carrying the
- * exact UTF-8 name for compliant clients.
+ * as a legacy fallback, plus an RFC 5987 `filename*` carrying the exact UTF-8
+ * name for servers that support it.
  */
 function buildContentDisposition(name: string): string {
-  const asciiFallback = name
-    .replace(/[^\x20-\x7E]/g, '_')
-    .replace(/["\\]/g, '_')
+  const asciiFallback = name.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_')
   const encoded = encodeURIComponent(name)
   return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encoded}`
 }
@@ -109,24 +109,31 @@ export function deleteEntry(
   })
 }
 
-export function moveEntry(
-  dbId: string,
-  entryId: string,
-  data: MoveRequest,
-): Promise<EntryCompact> {
+export function moveEntry(dbId: string, entryId: string, data: MoveRequest): Promise<EntryCompact> {
   return apiClient<EntryCompact>(`/databases/${dbId}/entries/${entryId}/move`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export async function downloadDocument(dbId: string, entryId: string): Promise<{ blob: Blob; filename: string }> {
+export async function downloadDocument(
+  dbId: string,
+  entryId: string,
+  secondPassword?: string,
+  part?: CertificatePart,
+): Promise<{ blob: Blob; filename: string }> {
   const base = `${getServerOrigin()}/v2.0`
-  const response = await fetch(`${base}/databases/${dbId}/entries/${entryId}/content`, {
-    headers: buildAuthHeaders(),
-    // Document contents are sensitive — keep them out of the disk cache.
-    cache: 'no-store',
-  })
+  const response = await fetch(
+    `${base}/databases/${dbId}/entries/${entryId}/content${part ? `?part=${part}` : ''}`,
+    {
+      headers: {
+        ...buildAuthHeaders(),
+        ...(secondPassword ? { 'X-Second-Password': toBase64(secondPassword) } : {}),
+      },
+      // Document contents are sensitive — keep them out of the disk cache.
+      cache: 'no-store',
+    },
+  )
 
   if (!response.ok) {
     if (response.status === 401) notifyApiAuthFailure()
@@ -155,6 +162,10 @@ export async function downloadDocument(dbId: string, entryId: string): Promise<{
 }
 
 export interface UploadOptions {
+  /** Certificate attachment; omitted for documents. */
+  part?: CertificatePart
+  /** Required when replacing content protected by a second password. */
+  secondPassword?: string
   /** Called on each upload progress tick with a 0..1 fraction. */
   onProgress?: (fraction: number) => void
   /** Optional AbortSignal to cancel the upload. */
@@ -162,7 +173,7 @@ export interface UploadOptions {
 }
 
 /**
- * Upload document content via XHR so we can surface progress to the UI.
+ * Upload document or certificate attachment content via XHR so we can surface progress to the UI.
  * Mirrors apiClient: attaches Authorization, resets the session watchdog on
  * success, throws ApiError on non-2xx responses, and auto-logs-out on 401.
  */
@@ -177,9 +188,15 @@ export function uploadDocument(
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('PUT', `${base}/databases/${dbId}/entries/${entryId}/content`)
+    xhr.open(
+      'PUT',
+      `${base}/databases/${dbId}/entries/${entryId}/content${options.part ? `?part=${options.part}` : ''}`,
+    )
     for (const [name, value] of Object.entries(authHeaders)) {
       xhr.setRequestHeader(name, value)
+    }
+    if (options.secondPassword) {
+      xhr.setRequestHeader('X-Second-Password', toBase64(options.secondPassword))
     }
     xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
     try {
@@ -200,7 +217,11 @@ export function uploadDocument(
       if (xhr.status >= 200 && xhr.status < 300) {
         notifyApiActivity()
         try {
-          resolve(xhr.responseText ? (JSON.parse(xhr.responseText) as EntryCompact) : (undefined as unknown as EntryCompact))
+          resolve(
+            xhr.responseText
+              ? (JSON.parse(xhr.responseText) as EntryCompact)
+              : (undefined as unknown as EntryCompact),
+          )
         } catch (err) {
           reject(err)
         }
@@ -230,7 +251,8 @@ export function uploadDocument(
 
     if (options.signal) {
       if (options.signal.aborted) {
-        xhr.abort()
+        // An XHR aborted before send need not dispatch onabort.
+        reject(new DOMException('Upload aborted', 'AbortError'))
         return
       }
       options.signal.addEventListener('abort', () => xhr.abort(), { once: true })
