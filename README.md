@@ -263,8 +263,6 @@ OpenID Connect authentication via configured identity providers (Ping Identity, 
 
    > The provider must include `id_token` in its allowed response types (the web client requests `id_token`, since the PD Server validates an id_token/access token rather than exchanging an authorization code). A provider configured for `code`-only response types will fail after the IdP round-trip.
 
-If the provider also has a *Browser redirect URL* set in the Server Manager (`https://your-server:8714/v2.0/oidc/callback`, which the Windows client and the Server Manager use from Server 20.0.0 to sign in in the user's own browser), register it at the identity provider beside the web client's redirect URI, not instead of it.
-
 ### Azure AD / Entra ID (Deprecated)
 
 Legacy Microsoft authentication using a fixed application client ID (`4d0af5fb-060c-40d5-bbf5-8b59f50d47ed`). This method is maintained for backward compatibility -- new deployments should use OIDC with an Entra ID provider instead.
