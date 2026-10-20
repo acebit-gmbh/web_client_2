@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile'
 import { describeApiError } from '@/lib/apiErrors'
+import type { UserProfile } from '@/api/types'
 import { PasskeyList } from './PasskeyList'
 import { ChangePasswordInline } from './ChangePasswordInline'
 
@@ -240,11 +241,22 @@ function ProfileEditForm() {
         </Button>
       )}
 
-      {profile.auth_modes?.some((m) => m === 'sspi' || m === 'iwa') && (
+      {isActiveDirectoryAccount(profile) && (
         <p className="pt-1 text-xs text-muted-foreground">{t('profile.adSyncNote')}</p>
       )}
     </form>
   )
+}
+
+/**
+ * Whether the account comes from Active Directory, whose sync may overwrite the
+ * profile fields. `auth_modes` lists the methods the user may sign in with, not
+ * the account type, so it decides only on an older server that sends no
+ * `account_type`.
+ */
+function isActiveDirectoryAccount(profile: UserProfile): boolean {
+  if (profile.account_type !== undefined) return profile.account_type === 'ad'
+  return profile.auth_modes?.some((m) => m === 'sspi' || m === 'iwa') ?? false
 }
 
 function ProfileField({ label, value }: { label: string; value?: string | null }) {

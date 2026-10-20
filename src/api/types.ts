@@ -38,10 +38,19 @@ export interface OidcProvider {
 
 // ─── User Profile ────────────────────────────────────────────
 
+/** Server 20.0.0+: where an account's sign-in identity comes from. */
+export type AccountType = 'password_depot' | 'ad' | 'azure_ad' | 'oidc'
+
 export interface UserProfile {
   id: string
   name: string
+  /** The sign-in methods the user may use. */
   auth_modes?: string[]
+  /**
+   * Server 20.0.0+: the account type; absent on older servers, which tell an
+   * Active Directory account only by `sspi` or `iwa` in `auth_modes`. Read-only.
+   */
+  account_type?: AccountType
   display_name?: string
   department?: string
   email?: string
