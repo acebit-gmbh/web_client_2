@@ -59,6 +59,16 @@ export interface UserProfile {
   upn?: string | null
   dn?: string | null
   objectId?: string | null
+  /**
+   * Server 20.0.0+: the directory binding of an OpenID Connect or Azure AD
+   * account: `idp_user_id` is the user's ID at the identity provider (usually
+   * the Entra Object ID for Entra ID and Azure AD); `idp` is the provider's
+   * `id` from `GET /auth/oidc` (an `oidc` account) or the Entra tenant ID (an
+   * `azure_ad` account). `''` when unset. Read-only here: only an
+   * administrator changes them.
+   */
+  idp_user_id?: string | null
+  idp?: string | null
   disabled?: boolean
   must_change_pass?: boolean
   cannot_change_pass?: boolean
