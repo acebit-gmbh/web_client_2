@@ -83,10 +83,18 @@ const EntryRow = memo(function EntryRow({
         )}
       </div>
 
-      {/* Login */}
+      {/* Login; a folder shows what it holds, where the server says so */}
       <div className="min-w-0">
         {!folder && item.login && (
           <span className="truncate text-sm text-muted-foreground">{item.login}</span>
+        )}
+        {folder && typeof item.entry_count === 'number' && typeof item.folder_count === 'number' && (
+          <span className="truncate text-sm text-muted-foreground">
+            {t('entryList.folderContents', {
+              entries: t('entryList.folderEntries', { count: item.entry_count }),
+              folders: t('entryList.folderFolders', { count: item.folder_count }),
+            })}
+          </span>
         )}
       </div>
 

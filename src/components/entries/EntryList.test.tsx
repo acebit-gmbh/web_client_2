@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import '@/i18n'
+import i18n from '@/i18n'
 import { EntryList } from './EntryList'
 import { EntryDetail } from './EntryDetail'
 import { getDatabaseIcon, getDatabaseIcons } from '@/api/icons'
@@ -94,6 +94,54 @@ beforeEach(() => {
   queryClient = new QueryClient()
   queryClient.setQueryData(['databases'], databasesResponse(database('db', ICON_CAPABILITY)))
   useNavigationStore.getState().setDatabase('db')
+})
+
+describe('EntryList folder counts', () => {
+  const rowText = (container: HTMLElement) => container.textContent ?? ''
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  it('shows what a folder holds, as a local database row does', () => {
+    const { container } = renderList([folder('f1', { entry_count: 12, folder_count: 3 })])
+    expect(rowText(container)).toContain('12 entries · 3 folders')
+  })
+
+  it('uses the singular for one', () => {
+    const { container } = renderList([folder('f1', { entry_count: 1, folder_count: 1 })])
+    expect(rowText(container)).toContain('1 entry · 1 folder')
+    expect(rowText(container)).not.toContain('1 entries')
+    expect(rowText(container)).not.toContain('1 folders')
+  })
+
+  it('shows an empty folder as zero and zero', () => {
+    const { container } = renderList([folder('f1', { entry_count: 0, folder_count: 0 })])
+    expect(rowText(container)).toContain('0 entries · 0 folders')
+  })
+
+  it('is translated through the locale files', async () => {
+    await i18n.changeLanguage('de')
+    const { container } = renderList([folder('f1', { entry_count: 1, folder_count: 2 })])
+    expect(rowText(container)).toContain('1 Eintrag · 2 Ordner')
+    await i18n.changeLanguage('en')
+  })
+
+  it('leaves the row as it was where the server does not send the keys', () => {
+    const { container } = renderList([folder('f1')])
+    expect(rowText(container)).not.toMatch(/entr(y|ies)/i)
+    expect(rowText(container)).not.toMatch(/\bfolders?\b ·/i)
+  })
+
+  it('shows nothing where only one of the keys came', () => {
+    const { container } = renderList([folder('f1', { entry_count: 5 })])
+    expect(rowText(container)).not.toContain('5 entries')
+  })
+
+  it('puts no counts on an entry row', () => {
+    const { container } = renderList([entry('e1')])
+    expect(rowText(container)).not.toMatch(/\d+ entr(y|ies)/i)
+  })
 })
 
 describe('EntryList icons', () => {

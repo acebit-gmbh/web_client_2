@@ -254,7 +254,12 @@
     "url": "URL",
     "updated": "Aktualisiert",
     "high": "Hoch",
-    "openUrl": "URL in neuem Tab öffnen"
+    "openUrl": "URL in neuem Tab öffnen",
+    "folderContents": "{{entries}} · {{folders}}",
+    "folderEntries_one": "{{count}} Eintrag",
+    "folderEntries_other": "{{count}} Einträge",
+    "folderFolders_one": "{{count}} Ordner",
+    "folderFolders_other": "{{count}} Ordner"
   },
   "status": {
     "sessionActive": "Sitzung aktiv",

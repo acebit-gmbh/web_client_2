@@ -254,7 +254,12 @@
     "url": "URL",
     "updated": "Bijgewerkt",
     "high": "Hoog",
-    "openUrl": "URL in nieuw tabblad openen"
+    "openUrl": "URL in nieuw tabblad openen",
+    "folderContents": "{{entries}} · {{folders}}",
+    "folderEntries_one": "{{count}} item",
+    "folderEntries_other": "{{count}} items",
+    "folderFolders_one": "{{count}} map",
+    "folderFolders_other": "{{count}} mappen"
   },
   "status": {
     "sessionActive": "Sessie actief",

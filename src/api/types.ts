@@ -238,6 +238,10 @@ export interface FolderCompact {
   tags?: string
   has_second_pass: boolean
   updated_at: string
+  /** Server 20.0.0+: entries in this folder at any depth that the caller may see, links included; the key is absent on older servers. */
+  entry_count?: number
+  /** Server 20.0.0+: subfolders of this folder at any depth that the caller may see; the key is absent on older servers. */
+  folder_count?: number
 }
 
 export interface FolderDetail extends FolderCompact {
