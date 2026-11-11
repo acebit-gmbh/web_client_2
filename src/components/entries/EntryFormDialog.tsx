@@ -43,9 +43,8 @@ import {
   type TotpEdit,
   type TotpField,
 } from '@/lib/totp'
+import { calendarDayOf, calendarDayToWire, isValidThru } from '@/lib/entryDates'
 import type { EntryDetail, EntryType, CreateEntryRequest, TotpWrite } from '@/api/types'
-
-const MM_YYYY_RE = /^(0[1-9]|1[0-2])\/\d{4}$/
 
 /**
  * The `totp.state` values the editor knows how to present. The API asks
@@ -113,7 +112,9 @@ export function EntryFormDialog({
   const [category, setCategory] = useState(entry?.category ?? '')
   const [tags, setTags] = useState(entry?.tags ?? '')
   const [importance, setImportance] = useState(entry?.importance ?? 'normal')
-  const [expiresAt, setExpiresAt] = useState(entry?.expires_at?.split('T')[0] ?? '')
+  // expires_at names a calendar day, answered as midnight UTC: the date input
+  // shows its date part in UTC
+  const [expiresAt, setExpiresAt] = useState(calendarDayOf(entry?.expires_at) ?? '')
 
   // Type-specific fields
   const [creditCard, setCreditCard] = useState(entry?.credit_card ?? {})
@@ -188,7 +189,7 @@ export function EntryFormDialog({
     setError(null)
 
     if (type === 'credit_card' && creditCard.valid_thru) {
-      if (!MM_YYYY_RE.test(creditCard.valid_thru)) {
+      if (!isValidThru(creditCard.valid_thru)) {
         setError(t('entryForm.invalidValidThru'))
         return
       }
@@ -243,7 +244,8 @@ export function EntryFormDialog({
     // Credit Card: expiry is derived from valid_thru on the server; omitting
     // expires_at here avoids overwriting the server-computed value.
     if (type !== 'credit_card') {
-      base.expires_at = expiresAt ? new Date(expiresAt).toISOString() : null
+      // the picked day as midnight UTC of that day, never the user's local midnight
+      base.expires_at = expiresAt ? calendarDayToWire(expiresAt) : null
     }
 
     // Add type-specific fields
@@ -776,7 +778,7 @@ function TypeFields({
         const isMmYyyy = def.kind === 'mm-yyyy'
         const isInteger = def.kind === 'integer'
         const isPassword = def.type === 'password'
-        const invalidMmYyyy = isMmYyyy && raw !== '' && !MM_YYYY_RE.test(raw)
+        const invalidMmYyyy = isMmYyyy && raw !== '' && !isValidThru(raw)
         return (
           <div key={def.key} className="space-y-1">
             <Label className="text-xs">{def.label}</Label>

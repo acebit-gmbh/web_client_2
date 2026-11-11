@@ -326,8 +326,19 @@ export interface ChildrenResponse {
 
 export interface CustomField {
   name: string
+  /**
+   * Always a string. Server 20.0.0 sends a typed field's value in its stored
+   * form: `date` YYYY-MM-DD, `decimal` with "." and no grouping, `number` its
+   * digits, `boolean` true or false; a value that fits no form as the text kept.
+   */
   value: string
   input_id?: string
+  /** Server 20.0.0 and later: the field's id, '' for a field not saved yet. */
+  id?: string
+  /** Server 20.0.0 and later: the field's type word (`text`, `date`, `decimal`, ...). */
+  type?: string
+  /** Server 20.0.0 and later: whether the server stores the value as a secret. */
+  secret?: boolean
 }
 
 // Password/custom entries use top-level fields (login, pass, urls, etc.), so

@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { EntryDetailField } from '../EntryDetailField'
+import { customFieldDisplay } from '@/lib/customFieldValue'
 import type { EntryDetail } from '@/api/types'
 
 export function PasswordDetail({ entry }: { entry: EntryDetail }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   return (
     <div className="space-y-4">
@@ -23,7 +24,12 @@ export function PasswordDetail({ entry }: { entry: EntryDetail }) {
             {t('entry.customFields')}
           </div>
           {entry.custom_fields.map((field, i) => (
-            <EntryDetailField key={i} label={field.name} value={field.value} copyable />
+            <EntryDetailField
+              key={i}
+              label={field.name}
+              value={customFieldDisplay(field, i18n.language)}
+              copyable
+            />
           ))}
         </div>
       )}

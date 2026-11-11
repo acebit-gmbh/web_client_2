@@ -17,6 +17,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { getEntry } from '@/api/entries'
 import { describeApiError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
+import { formatCalendarDay, isCalendarDayPast } from '@/lib/entryDates'
 import {
   needsAnswer,
   pendingWarning,
@@ -32,32 +33,6 @@ interface EntryDetailProps {
   onEdit?: () => void
   onMove?: () => void
   onDelete?: () => void
-}
-
-/**
- * Formats a date-only value (the server stores `expires_at` as UTC midnight)
- * without applying the local timezone offset — otherwise a user in UTC-5 sees
- * the previous calendar day.
- */
-function formatDateOnlyUtc(iso: string, locale: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(d)
-}
-
-/** True once the expiry calendar day has fully passed (compared in UTC). */
-function isExpired(iso: string): boolean {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return false
-  const now = new Date()
-  const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  const expiryUtc = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
-  return expiryUtc < todayUtc
 }
 
 export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: EntryDetailProps) {
@@ -279,9 +254,13 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
                     <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                       {t('entry.expires')}
                     </div>
-                    <div className={`text-sm ${isExpired(entry.expires_at) ? 'text-red-500' : ''}`}>
-                      {formatDateOnlyUtc(entry.expires_at, i18n.language)}
-                      {isExpired(entry.expires_at) && ` (${t('entry.expired')})`}
+                    {/* expires_at names a calendar day: shown as that day, expired once the
+                        user's own day is past it (src/lib/entryDates.ts) */}
+                    <div
+                      className={`text-sm ${isCalendarDayPast(entry.expires_at) ? 'text-red-500' : ''}`}
+                    >
+                      {formatCalendarDay(entry.expires_at, i18n.language)}
+                      {isCalendarDayPast(entry.expires_at) && ` (${t('entry.expired')})`}
                     </div>
                   </div>
                 )}
