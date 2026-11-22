@@ -33,6 +33,16 @@ describe('describeLoginError', () => {
   ])('status %i, code %i, message %j -> %j', (status, code, message, expected) => {
     expect(describeLoginError(new ApiError(status, code, message), t)).toBe(expected)
   })
+
+  // Server 20.0.0: a sign-in a mirror, or a server that hands over, refuses is
+  // answered 403 with a text that says what happened - shown as it is.
+  it.each([
+    'This server is no longer a mirror of its primary server. Sign in on the primary server.',
+    'This server has been replaced by the primary server pd2.example.com. Connect to that server.',
+    'This server has left its primary server. Restart the service to finish.',
+  ])('a 403 sign-in refusal shows the server text %j', (message) => {
+    expect(describeLoginError(new ApiError(403, 403, message), t)).toBe(message)
+  })
 })
 
 describe('describeOtpError', () => {
@@ -56,6 +66,11 @@ describe('describeApiError', () => {
       expect(
         describeApiError(new ApiError(403, 403, 'Specific server complaint'), t),
       ).toBe('Specific server complaint')
+    })
+
+    it("shows a mirror server's refusal of a change as the server says it, not as a missing permission", () => {
+      const mirror = 'The mirror server does not support this operation.'
+      expect(describeApiError(new ApiError(403, 403, mirror), t)).toBe(mirror)
     })
 
     it('falls back to status-specific keys when message is empty', () => {

@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { withServerRefusal } from './auth'
 import { WEB_CLIENT_IDENTITY } from './clientIdentity'
 import type { LoginResponse } from './types'
 
@@ -28,17 +29,22 @@ export function webauthnBegin(
   user: string,
   scope: 'client' | 'admin' = 'client',
 ): Promise<WebAuthnBeginResponse> {
-  return apiClient<WebAuthnBeginResponse>('/auth/webauthn/begin', {
-    method: 'POST',
-    body: JSON.stringify({ user, scope, client: WEB_CLIENT_IDENTITY }),
-    skipAuth: true,
-  })
+  // A server that refuses every request answers with its own text (see withServerRefusal).
+  return withServerRefusal(() =>
+    apiClient<WebAuthnBeginResponse>('/auth/webauthn/begin', {
+      method: 'POST',
+      body: JSON.stringify({ user, scope, client: WEB_CLIENT_IDENTITY }),
+      skipAuth: true,
+    }),
+  )
 }
 
 export function webauthnComplete(data: WebAuthnCompleteRequest): Promise<LoginResponse> {
-  return apiClient<LoginResponse>('/auth/webauthn/complete', {
-    method: 'POST',
-    body: JSON.stringify(data),
-    skipAuth: true,
-  })
+  return withServerRefusal(() =>
+    apiClient<LoginResponse>('/auth/webauthn/complete', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
+  )
 }
