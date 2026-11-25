@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { EntryDetailField } from '../EntryDetailField'
+import { calendarDayDisplay } from '@/lib/entryDates'
 import type { EntryDetail } from '@/api/types'
 
 export function IdentityDetail({ entry }: { entry: EntryDetail }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const id = entry.identity
   if (!id) return null
 
@@ -12,7 +13,10 @@ export function IdentityDetail({ entry }: { entry: EntryDetail }) {
       <EntryDetailField label={t('entry.account')} value={id.account} copyable />
       <EntryDetailField label={t('entry.firstName')} value={id.first_name} />
       <EntryDetailField label={t('entry.lastName')} value={id.last_name} />
-      <EntryDetailField label={t('entry.birthDate')} value={id.birth_date} />
+      <EntryDetailField
+        label={t('entry.birthDate')}
+        value={calendarDayDisplay(id.birth_date, i18n.language)}
+      />
       <EntryDetailField label={t('entry.email')} value={id.email} copyable />
       <EntryDetailField label={t('entry.company')} value={id.company} />
       <EntryDetailField label={t('entry.phone')} value={id.phone} copyable />

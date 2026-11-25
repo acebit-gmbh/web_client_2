@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { EntryDetailField } from '../EntryDetailField'
+import { calendarDayDisplay } from '@/lib/entryDates'
 import type { EntryDetail } from '@/api/types'
 
 export function LicenseDetail({ entry }: { entry: EntryDetail }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const lic = entry.license
   if (!lic) return null
 
@@ -17,7 +18,10 @@ export function LicenseDetail({ entry }: { entry: EntryDetail }) {
       <EntryDetailField label={t('entry.url')} value={lic.url} url copyable />
       <EntryDetailField label={t('entry.login')} value={lic.user} copyable />
       <EntryDetailField label={t('entry.password')} value={lic.pass} sensitive copyable />
-      <EntryDetailField label={t('entry.purchaseDate')} value={lic.purchase_date} />
+      <EntryDetailField
+        label={t('entry.purchaseDate')}
+        value={calendarDayDisplay(lic.purchase_date, i18n.language)}
+      />
       <EntryDetailField label={t('entry.orderNumber')} value={lic.order_number} />
       <EntryDetailField label={t('entry.regEmail')} value={lic.reg_email} copyable />
     </div>

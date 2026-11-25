@@ -75,6 +75,16 @@ export function formatCalendarDay(iso: string, locale: string): string {
 }
 
 /**
+ * A day field for display (a licence's purchase date, an identity's date of
+ * birth): the calendar day in the user's language, a text that names no day as
+ * it came, '' for no value.
+ */
+export function calendarDayDisplay(value: string | null | undefined, locale: string): string {
+  if (!value) return ''
+  return formatCalendarDay(value, locale) || value
+}
+
+/**
  * True once the calendar day has passed for the user: the day lies before the
  * user's own day today. A card valid through 12/2029 expires on 31 December
  * 2029 and is expired from 1 January 2030 on, wherever the user is.

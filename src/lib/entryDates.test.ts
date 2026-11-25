@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { inTimeZone } from '@/test/timeZone'
 import {
+  calendarDayDisplay,
   calendarDayOf,
   calendarDayToWire,
   formatCalendarDay,
@@ -34,6 +35,14 @@ describe.each(ZONES)('calendar days in %s', (zone) => {
     expect(calendarDayOf(undefined)).toBeNull()
     expect(calendarDayOf('')).toBeNull()
     expect(calendarDayOf('soon')).toBeNull()
+  })
+
+  it('shows a day field as its day, and a text that names no day as it came', () => {
+    expect(calendarDayDisplay('2025-01-15T00:00:00.000Z', 'en-US')).toBe('Jan 15, 2025')
+    expect(calendarDayDisplay('2025-01-15', 'en-US')).toBe('Jan 15, 2025')
+    expect(calendarDayDisplay('SW1A 1AA', 'en-US')).toBe('SW1A 1AA')
+    expect(calendarDayDisplay(null, 'en-US')).toBe('')
+    expect(calendarDayDisplay(undefined, 'en-US')).toBe('')
   })
 
   it('shows the day itself, never the day before or after', () => {

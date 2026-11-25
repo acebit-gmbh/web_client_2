@@ -28,14 +28,28 @@ function decimalSeparator(locale: string): string {
   return separator
 }
 
+/** The user's words for a boolean field's two values, e.g. Yes and No. */
+export interface BooleanWords {
+  true: string
+  false: string
+}
+
 /**
  * The text the detail view shows for a custom field: a date as that calendar
  * day in the user's language, a decimal with the user's decimal separator (the
- * digits as they came, never through a float), every other value as it came.
+ * digits as they came, never through a float), a boolean as the user's word
+ * for true or false when `words` are given, every other value as it came.
  */
-export function customFieldDisplay(field: CustomField, locale: string): string {
+export function customFieldDisplay(
+  field: CustomField,
+  locale: string,
+  words?: BooleanWords,
+): string {
   const value = field.value ?? ''
   if (field.type === 'date' && isCalendarDay(value)) return formatCalendarDay(value, locale)
+  if (field.type === 'boolean' && words && (value === 'true' || value === 'false')) {
+    return words[value]
+  }
   if (field.type === 'decimal' && DECIMAL_RE.test(value)) {
     return value.replace('.', decimalSeparator(locale))
   }

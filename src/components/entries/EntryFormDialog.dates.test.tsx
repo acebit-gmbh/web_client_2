@@ -150,6 +150,8 @@ describe('Valid Thru in the entry form', () => {
 
     await press('Save')
     expect(submit).not.toHaveBeenCalled()
-    expect(screen.getByText(/MM\/YYYY/)).toBeInTheDocument()
+    // the message names the years the server takes, which a value already in MM/YYYY form misses
+    expect(screen.getByText(/MM\/YYYY/)).toHaveTextContent(/1950/)
+    expect(screen.getByText(/MM\/YYYY/)).toHaveTextContent(/2199/)
   })
 })

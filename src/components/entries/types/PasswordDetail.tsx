@@ -5,6 +5,7 @@ import type { EntryDetail } from '@/api/types'
 
 export function PasswordDetail({ entry }: { entry: EntryDetail }) {
   const { t, i18n } = useTranslation()
+  const booleanWords = { true: t('entry.customFieldTrue'), false: t('entry.customFieldFalse') }
 
   return (
     <div className="space-y-4">
@@ -27,7 +28,8 @@ export function PasswordDetail({ entry }: { entry: EntryDetail }) {
             <EntryDetailField
               key={i}
               label={field.name}
-              value={customFieldDisplay(field, i18n.language)}
+              value={customFieldDisplay(field, i18n.language, booleanWords)}
+              sensitive={field.secret === true}
               copyable
             />
           ))}

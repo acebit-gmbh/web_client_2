@@ -46,7 +46,16 @@ describe('customFieldDisplay', () => {
   it('shows every other type as it came', () => {
     expect(customFieldDisplay(field('text', '2029-12-31'), 'en-US')).toBe('2029-12-31')
     expect(customFieldDisplay(field('number', '9007199254740993'), 'de')).toBe('9007199254740993')
-    expect(customFieldDisplay(field('boolean', 'true'), 'en-US')).toBe('true')
     expect(customFieldDisplay(field(undefined, '0.50'), 'de')).toBe('0.50')
+  })
+
+  it("shows a boolean in the user's words, and a value that is neither as it came", () => {
+    const words = { true: 'Ja', false: 'Nein' }
+    expect(customFieldDisplay(field('boolean', 'true'), 'de', words)).toBe('Ja')
+    expect(customFieldDisplay(field('boolean', 'false'), 'de', words)).toBe('Nein')
+    expect(customFieldDisplay(field('boolean', 'maybe'), 'de', words)).toBe('maybe')
+    expect(customFieldDisplay(field('boolean', ''), 'de', words)).toBe('')
+    expect(customFieldDisplay(field('text', 'true'), 'de', words)).toBe('true')
+    expect(customFieldDisplay(field('boolean', 'true'), 'en-US')).toBe('true')
   })
 })

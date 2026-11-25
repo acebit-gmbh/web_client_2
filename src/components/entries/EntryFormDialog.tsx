@@ -43,7 +43,13 @@ import {
   type TotpEdit,
   type TotpField,
 } from '@/lib/totp'
-import { calendarDayOf, calendarDayToWire, isValidThru } from '@/lib/entryDates'
+import {
+  calendarDayOf,
+  calendarDayToWire,
+  isValidThru,
+  VALID_THRU_YEAR_FIRST,
+  VALID_THRU_YEAR_LAST,
+} from '@/lib/entryDates'
 import type { EntryDetail, EntryType, CreateEntryRequest, TotpWrite } from '@/api/types'
 
 /**
@@ -190,7 +196,12 @@ export function EntryFormDialog({
 
     if (type === 'credit_card' && creditCard.valid_thru) {
       if (!isValidThru(creditCard.valid_thru)) {
-        setError(t('entryForm.invalidValidThru'))
+        setError(
+          t('entryForm.invalidValidThru', {
+            first: VALID_THRU_YEAR_FIRST,
+            last: VALID_THRU_YEAR_LAST,
+          }),
+        )
         return
       }
     }
