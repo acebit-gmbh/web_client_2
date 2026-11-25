@@ -8,7 +8,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { changePassword } from '@/api/auth'
 import { describeApiError } from '@/lib/apiErrors'
 
-export function ChangePasswordInline() {
+/** onChanged runs once the server has accepted the new password. */
+export function ChangePasswordInline({ onChanged }: { onChanged?: () => void | Promise<void> } = {}) {
   const { t } = useTranslation()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -45,6 +46,7 @@ export function ChangePasswordInline() {
       setSuccess(true)
       reset()
       setTimeout(() => setSuccess(false), 3000)
+      await onChanged?.()
     } catch (err) {
       setError(describeApiError(err, t))
     } finally {

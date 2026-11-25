@@ -221,6 +221,10 @@
     "passwordMismatch": "New passwords do not match",
     "passwordChanged": "Password changed successfully"
   },
+  "passwordGate": {
+    "title": "Change your password",
+    "description": "Your password must be changed before you can open your databases."
+  },
   "passkey": {
     "title": "Passkeys",
     "description": "Sign in without a password using biometrics or a security key",

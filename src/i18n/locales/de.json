@@ -221,6 +221,10 @@
     "passwordMismatch": "Neue Passw\u00f6rter stimmen nicht \u00fcberein",
     "passwordChanged": "Passwort erfolgreich ge\u00e4ndert"
   },
+  "passwordGate": {
+    "title": "Ändern Sie Ihr Passwort",
+    "description": "Ihr Passwort muss geändert werden, bevor Sie Ihre Datenbanken öffnen können."
+  },
   "passkey": {
     "title": "Passkeys",
     "description": "Anmeldung ohne Passwort mit Biometrie oder Sicherheitsschl\u00fcssel",

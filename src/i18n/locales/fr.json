@@ -221,6 +221,10 @@
     "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas",
     "passwordChanged": "Mot de passe modifié avec succès"
   },
+  "passwordGate": {
+    "title": "Modifiez votre mot de passe",
+    "description": "Votre mot de passe doit être modifié avant que vous puissiez ouvrir vos bases de données."
+  },
   "passkey": {
     "title": "Passkeys",
     "description": "Connectez-vous sans mot de passe grâce à la biométrie ou à une clé de sécurité",

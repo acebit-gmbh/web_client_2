@@ -183,6 +183,8 @@ User preferences (language, theme, last-used server, last-used auth method, etc.
 
 Default method. User enters username and password, which are sent to `POST /v2.0/auth/login` with `auth: "standard"`.
 
+Where `GET /me` answers `must_change_pass: true` after such a sign-in -- an administrator set "must change password at next logon", or the password is older than the server's maximum age -- the client asks for a new password before it opens the vault; the user may sign out instead. An account that may not change its password itself (`cannot_change_pass`, a super-administrator) is not asked.
+
 ### SSPI (Domain Login)
 
 Kerberos/NTLM authentication with explicit domain credentials. User enters credentials in UPN format (`user@domain.com`) or down-level format (`DOMAIN\username`). Sent with `auth: "sspi"`.
@@ -297,7 +299,7 @@ The full original login request (including OIDC/Azure tokens) is preserved and r
 src/
   api/              API client layer (fetch wrapper, endpoint functions, types)
   components/
-    auth/           Login form, auth method fields, TFA, OIDC provider select
+    auth/           Login form, auth method fields, TFA, OIDC provider select, password change before the vault
     common/         Shared components (confirm dialog, copy button, password generator)
     database/       Database selector
     entries/        Entry list, detail views (12 types), entry form

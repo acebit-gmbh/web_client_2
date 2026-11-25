@@ -42,9 +42,18 @@ interface AuthState {
   user: UserProfile | null
   isAuthenticated: boolean
   lastApiCallAt: number | null
+  /**
+   * The session was opened with a password (`auth: "standard"`). While its
+   * account must change the password (`must_change_pass` in `GET /me`), the
+   * server serves such a session only the password change (see
+   * PasswordChangeGate).
+   */
+  passwordSignIn: boolean
 
   setToken: (token: string) => void
-  setAuth: (token: string, user: UserProfile) => void
+  setAuth: (token: string, user: UserProfile, passwordSignIn?: boolean) => void
+  /** The signed-in user's profile read again, e.g. after a password change. */
+  setUser: (user: UserProfile) => void
   logout: (options?: LogoutOptions) => void
   resetSessionTimer: () => void
 }
@@ -56,16 +65,20 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       lastApiCallAt: null,
+      passwordSignIn: false,
 
       setToken: (token) => set({ token }),
 
-      setAuth: (token, user) =>
+      setAuth: (token, user, passwordSignIn = false) =>
         set({
           token,
           user,
           isAuthenticated: true,
           lastApiCallAt: Date.now(),
+          passwordSignIn,
         }),
+
+      setUser: (user) => set({ user }),
 
       logout: (options) => {
         const { broadcast = true, revoke = true } = options ?? {}
@@ -107,6 +120,7 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           isAuthenticated: false,
           lastApiCallAt: null,
+          passwordSignIn: false,
         })
         // Belt-and-braces: persist writes the cleared state, but we also
         // remove the key so a tab opened from history can't rehydrate any

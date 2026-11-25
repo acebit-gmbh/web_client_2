@@ -221,6 +221,10 @@
     "passwordMismatch": "Nieuwe wachtwoorden komen niet overeen",
     "passwordChanged": "Wachtwoord is gewijzigd"
   },
+  "passwordGate": {
+    "title": "Wijzig uw wachtwoord",
+    "description": "Uw wachtwoord moet worden gewijzigd voordat u uw databases kunt openen."
+  },
   "passkey": {
     "title": "Passkeys",
     "description": "Meld u aan zonder wachtwoord met biometrie of een beveiligingssleutel",

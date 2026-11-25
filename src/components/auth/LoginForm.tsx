@@ -319,7 +319,7 @@ export function LoginForm() {
       useAuthStore.getState().setToken(result.access_token)
       try {
         const profile = await getProfile()
-        setAuth(result.access_token, profile)
+        setAuth(result.access_token, profile, request.auth === 'standard')
         navigate('/vault', { replace: true })
       } catch (profileErr) {
         // The token was granted but the profile fetch failed (5xx / network —
@@ -449,7 +449,7 @@ export function LoginForm() {
       useAuthStore.getState().setToken(result.access_token)
       try {
         const profile = await getProfile()
-        setAuth(result.access_token, profile)
+        setAuth(result.access_token, profile, request.auth === 'standard')
         setLoginPhase('credentials')
         navigate('/vault', { replace: true })
       } catch (profileErr) {

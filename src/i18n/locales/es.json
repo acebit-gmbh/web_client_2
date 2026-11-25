@@ -221,6 +221,10 @@
     "passwordMismatch": "Las contraseñas nuevas no coinciden",
     "passwordChanged": "Contraseña cambiada correctamente"
   },
+  "passwordGate": {
+    "title": "Cambie su contraseña",
+    "description": "Debe cambiar su contraseña antes de poder abrir sus bases de datos."
+  },
   "passkey": {
     "title": "Passkeys",
     "description": "Inicie sesión sin contraseña mediante biometría o una llave de seguridad",

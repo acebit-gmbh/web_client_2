@@ -7,7 +7,9 @@ import { useTheme } from '@/hooks/useTheme'
 import { useCrossTabLogout } from '@/hooks/useCrossTabLogout'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { AppBar } from '@/components/layout/AppBar'
+import { PasswordChangeGate } from '@/components/auth/PasswordChangeGate'
 import { Toaster } from '@/components/ui/toast'
+import { mustChangePasswordFirst } from '@/lib/passwordGate'
 
 // Route-level code splitting — unauthenticated users no longer pay for the
 // vault bundle, and 404s no longer pull in either.
@@ -17,7 +19,11 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const user = useAuthStore((s) => s.user)
+  const passwordSignIn = useAuthStore((s) => s.passwordSignIn)
   if (!isAuthenticated) return <Navigate to="/login" replace />
+  // The password change comes first (until then the server answers the vault's requests with 403).
+  if (mustChangePasswordFirst(user, passwordSignIn)) return <PasswordChangeGate />
   return <>{children}</>
 }
 
