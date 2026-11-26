@@ -242,6 +242,8 @@ export interface FolderCompact {
   entry_count?: number
   /** Server 20.0.0+: subfolders of this folder at any depth that the caller may see; the key is absent on older servers. */
   folder_count?: number
+  /** Server 20.0.0+: in a search result, the folders this folder lies in, nearest first ([] at the top); absent elsewhere and on older servers. */
+  path?: BreadcrumbSegment[]
 }
 
 export interface FolderDetail extends FolderCompact {
@@ -286,6 +288,8 @@ export interface EntryCompact {
   warning?: EntryWarning | null
   login?: string | null
   url?: string | null
+  /** Server 20.0.0+: the additional URLs of a password or custom entry ([] when there are none); absent for other types and on older servers. */
+  urls?: string[]
   /** Standard icon file name. Server 20.0.0+: always `ico<N>.svg` (N 0..134) and the fallback when `database_icon` is set. */
   icon?: string
   /** Server 20.0.0+: the entry's icon in its own database, or null; the key is absent on older servers. */
@@ -295,6 +299,8 @@ export interface EntryCompact {
   tags?: string
   updated_at: string
   expires_at?: string | null
+  /** Server 20.0.0+: in a search result, the folders the entry lies in, nearest first ([] at the top); absent elsewhere and on older servers. */
+  path?: BreadcrumbSegment[]
 }
 
 // ─── Compact Item (discriminated union) ──────────────────────

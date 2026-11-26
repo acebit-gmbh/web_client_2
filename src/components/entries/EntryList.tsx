@@ -9,7 +9,7 @@ import { formatRelativeDate } from '@/lib/dates'
 import { getSafeHref, openSafeUrl } from '@/lib/url'
 import { isBlockingWarning, warningIdentity, warningMessageText } from '@/lib/conditionalAccess'
 import { useOptionsStore } from '@/stores/optionsStore'
-import type { CompactItem, EntryCompact, EntryWarning } from '@/api/types'
+import type { BreadcrumbSegment, CompactItem, EntryCompact, EntryWarning } from '@/api/types'
 import { isFolder } from '@/api/types'
 
 interface EntryListProps {
@@ -65,20 +65,31 @@ const EntryRow = memo(function EntryRow({
       {/* Icon */}
       <EntryIcon type={item.type} icon={item.icon} databaseIcon={item.database_icon} />
 
-      {/* Name */}
-      <div className="flex min-w-0 items-center gap-1.5">
-        <span className="truncate text-sm font-medium">{item.name}</span>
-        {item.has_second_pass && (
-          <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
-        )}
-        {!folder && item.has_otp && (
+      {/* Name; a search result also names the folders it lies in (Server 20.0.0+) */}
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate text-sm font-medium">{item.name}</span>
+          {item.has_second_pass && (
+            <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
+          )}
+          {!folder && item.has_otp && (
+            <span
+              role="img"
+              aria-label={t('entry.oneTimeCode.hasCode')}
+              title={t('entry.oneTimeCode.hasCode')}
+              className="flex shrink-0"
+            >
+              <KeyRound className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+            </span>
+          )}
+        </div>
+        {item.path && item.path.length > 0 && (
           <span
-            role="img"
-            aria-label={t('entry.oneTimeCode.hasCode')}
-            title={t('entry.oneTimeCode.hasCode')}
-            className="flex shrink-0"
+            data-testid="entry-folder-path"
+            className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground"
           >
-            <KeyRound className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+            <FolderIcon className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="truncate">{folderPathText(item.path)}</span>
           </span>
         )}
       </div>
@@ -297,4 +308,12 @@ export function EntryList({ items, selectedEntryId, onFolderClick, onEntryClick 
 /** Strip https:// or http:// for cleaner URL display */
 function stripProtocol(url: string): string {
   return url.replace(/^https?:\/\//, '')
+}
+
+/** The folders of a search result from the top down ("Shops / Payments"); the server lists them nearest first. */
+function folderPathText(path: BreadcrumbSegment[]): string {
+  return [...path]
+    .reverse()
+    .map((segment) => segment.name)
+    .join(' / ')
 }

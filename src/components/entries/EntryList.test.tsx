@@ -144,6 +144,35 @@ describe('EntryList folder counts', () => {
   })
 })
 
+describe('EntryList folder path of a search result', () => {
+  const pathText = (container: HTMLElement) =>
+    [...container.querySelectorAll('[data-testid="entry-folder-path"]')].map((el) => el.textContent)
+
+  it('names the folders of a hit from the top down; the server sends them nearest first', () => {
+    const { container } = renderList([
+      entry('e1', {
+        path: [
+          { id: 'p', name: 'Payments' },
+          { id: 's', name: 'Shops' },
+        ],
+      }),
+      folder('f1', { path: [{ id: 's', name: 'Shops' }] }),
+    ])
+    // Folders are listed before entries, so the folder's path comes first.
+    expect(pathText(container)).toEqual(['Shops', 'Shops / Payments'])
+  })
+
+  it('shows no path for a hit at the top of the database', () => {
+    const { container } = renderList([entry('e1', { path: [] })])
+    expect(pathText(container)).toEqual([])
+  })
+
+  it('shows no path for a row without one: a folder listing, an older server', () => {
+    const { container } = renderList([entry('e1'), folder('f1')])
+    expect(pathText(container)).toEqual([])
+  })
+})
+
 describe('EntryList icons', () => {
   it('mounts no image hook and asks the server nothing for rows without a database icon', async () => {
     const items: CompactItem[] = [
