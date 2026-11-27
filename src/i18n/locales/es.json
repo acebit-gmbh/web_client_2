@@ -164,7 +164,9 @@
     "protected": "Protegido",
     "label": "Segunda contraseña",
     "unlock": "Desbloquear",
-    "wrongPassword": "Segunda contraseña incorrecta"
+    "wrongPassword": "Segunda contraseña incorrecta",
+    "cannotOpen": "Esta entrada está protegida por una segunda contraseña y no se puede abrir en el cliente web.",
+    "readOnly": "Esta entrada está protegida por una segunda contraseña y no se puede modificar en el cliente web."
   },
   "sidebar": {
     "folders": "Carpetas",

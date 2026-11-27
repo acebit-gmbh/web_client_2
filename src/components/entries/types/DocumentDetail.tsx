@@ -9,7 +9,7 @@ import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { FileMetadata } from './FileMetadata'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useToast } from '@/hooks/useToast'
-import { describeApiError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
+import { describeEntryReadError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
 import type { EntryDetail } from '@/api/types'
 
 export function DocumentDetail({ entry }: { entry: EntryDetail }) {
@@ -52,7 +52,8 @@ export function DocumentDetail({ entry }: { entry: EntryDetail }) {
         // EntryDetail will ask for a fresh second password when the cached one expires.
         clearSecondPassword(entry.id)
       }
-      toast.error(describeApiError(err, t), {
+      // A download is a read: 403/4030 says the entry cannot be opened, not changed.
+      toast.error(describeEntryReadError(err, t), {
         title: t('toast.downloadFailed'),
       })
     } finally {

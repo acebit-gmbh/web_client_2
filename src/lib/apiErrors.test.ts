@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { TFunction } from 'i18next'
 import {
   describeApiError,
+  describeEntryReadError,
   describeIconError,
   describeIconUploadError,
   describeLoginError,
@@ -48,6 +49,7 @@ describe('describeLoginError', () => {
 describe('describeOtpError', () => {
   it.each([
     [403, 4031, 'secondPassword.wrongPassword'],
+    [403, 4030, 'secondPassword.cannotOpen'],
     [403, 403, 'entry.oneTimeCode.notAvailable'],
     [403, 4099, 'entry.oneTimeCode.notAvailable'],
     [404, 4041, 'entry.oneTimeCode.none'],
@@ -57,6 +59,26 @@ describe('describeOtpError', () => {
     [400, 4031, 'entry.oneTimeCode.loadFailed'],
   ])('status %i, code %i -> %j', (status, code, expected) => {
     expect(describeOtpError(status, code, t)).toBe(expected)
+  })
+})
+
+// Server 20.0.0: 403/4030 - an entry under a second password the server does
+// not open for the web client. In the browser's language, never the server's
+// message; a wrong password (4031) and a plain 403 keep their own handling.
+describe('describeEntryReadError', () => {
+  it.each([
+    [403, 4030, 'This entry is protected by a second password ...', 'secondPassword.cannotOpen'],
+    [403, 4031, 'Invalid second password.', 'Invalid second password.'],
+    [403, 403, 'Access denied.', 'Access denied.'],
+    [404, 404, '', 'errors.notFound'],
+  ])('status %i, code %i, message %j -> %j', (status, code, message, expected) => {
+    expect(describeEntryReadError(new ApiError(status, code, message), t)).toBe(expected)
+  })
+
+  it('words a change refused for such an entry as describeApiError does', () => {
+    expect(describeApiError(new ApiError(403, 4030, 'Changing ... is refused.'), t)).toBe(
+      'secondPassword.readOnly',
+    )
   })
 })
 

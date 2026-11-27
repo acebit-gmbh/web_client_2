@@ -164,7 +164,9 @@
     "protected": "Protected",
     "label": "Second Password",
     "unlock": "Unlock",
-    "wrongPassword": "Wrong second password"
+    "wrongPassword": "Wrong second password",
+    "cannotOpen": "This entry is protected by a second password and cannot be opened in the web client.",
+    "readOnly": "This entry is protected by a second password and cannot be changed in the web client."
   },
   "sidebar": {
     "folders": "Folders",

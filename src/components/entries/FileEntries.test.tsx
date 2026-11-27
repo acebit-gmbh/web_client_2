@@ -452,3 +452,42 @@ it('does not turn a plain certificate permission refusal into a password prompt'
   await screen.findByText('Access denied')
   expect(screen.queryByRole('dialog', { name: 'Second Password Required' })).not.toBeInTheDocument()
 })
+
+it('says a content download refused with 403/4030 cannot be opened, an upload refused with it cannot be changed', async () => {
+  useSecondPasswordStore.getState().setSecondPassword('cert', 'second-secret')
+  download.mockRejectedValueOnce(new ApiError(403, 4030, 'Server words'))
+  upload.mockRejectedValueOnce(new ApiError(403, 4030, 'Server words'))
+  mount(<EntryTypeRouter entry={entry()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Download Public certificate' }))
+  await act(async () => fireEvent.click(screen.getByRole('button', { name: /^Download$/ })))
+  const file = new File(['secret'], 'private.key')
+  await act(async () =>
+    fireEvent.change(screen.getByLabelText('Upload Private key'), { target: { files: [file] } }),
+  )
+  expect(useToastStore.getState().toasts.map((toast) => toast.message)).toEqual([
+    'This entry is protected by a second password and cannot be opened in the web client.',
+    'This entry is protected by a second password and cannot be changed in the web client.',
+  ])
+  expect(useSecondPasswordStore.getState().getSecondPassword('cert')).toBe('second-secret')
+})
+
+it('says a document download refused with 403/4030 cannot be opened', async () => {
+  download.mockRejectedValueOnce(new ApiError(403, 4030, 'Server words'))
+  mount(
+    <EntryTypeRouter
+      entry={entry({
+        id: 'doc',
+        type: 'document',
+        certificate: undefined,
+        document: { name: 'notes.txt', type: 'TXT', size: 5 },
+      })}
+    />,
+  )
+  fireEvent.click(screen.getByRole('button', { name: /^Download$/ }))
+  const confirm = screen.getAllByRole('button', { name: /^Download$/ })
+  await act(async () => fireEvent.click(confirm[confirm.length - 1]))
+  expect(download).toHaveBeenCalledOnce()
+  expect(useToastStore.getState().toasts.map((toast) => toast.message)).toEqual([
+    'This entry is protected by a second password and cannot be opened in the web client.',
+  ])
+})

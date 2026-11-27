@@ -16,7 +16,7 @@ import { useEntry } from '@/hooks/useEntry'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { getEntry } from '@/api/entries'
-import { describeApiError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
+import { describeEntryReadError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
 import { formatCalendarDay, isCalendarDayPast } from '@/lib/entryDates'
 import {
   needsAnswer,
@@ -181,7 +181,7 @@ export function EntryDetail({ dbId, compactEntry, onEdit, onMove, onDelete }: En
           </div>
         ) : error && !needsSecondPassword ? (
           <div className="space-y-3">
-            <div className="text-sm text-destructive">{describeApiError(error, t)}</div>
+            <div className="text-sm text-destructive">{describeEntryReadError(error, t)}</div>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => refetch()}>
               <RotateCw className="h-3.5 w-3.5" />
               {t('common.retry')}

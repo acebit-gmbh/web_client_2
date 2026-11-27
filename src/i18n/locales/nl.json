@@ -164,7 +164,9 @@
     "protected": "Beveiligd",
     "label": "Tweede wachtwoord",
     "unlock": "Ontgrendelen",
-    "wrongPassword": "Onjuist tweede wachtwoord"
+    "wrongPassword": "Onjuist tweede wachtwoord",
+    "cannotOpen": "Dit item is beveiligd met een tweede wachtwoord en kan niet in de webclient worden geopend.",
+    "readOnly": "Dit item is beveiligd met een tweede wachtwoord en kan niet in de webclient worden gewijzigd."
   },
   "sidebar": {
     "folders": "Mappen",

@@ -164,7 +164,9 @@
     "protected": "Gesch\u00fctzt",
     "label": "Zweites Passwort",
     "unlock": "Entsperren",
-    "wrongPassword": "Falsches zweites Passwort"
+    "wrongPassword": "Falsches zweites Passwort",
+    "cannotOpen": "Dieser Eintrag ist durch ein zweites Passwort geschützt und kann im Web-Client nicht geöffnet werden.",
+    "readOnly": "Dieser Eintrag ist durch ein zweites Passwort geschützt und kann im Web-Client nicht geändert werden."
   },
   "sidebar": {
     "folders": "Ordner",

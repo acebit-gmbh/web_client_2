@@ -12,7 +12,11 @@ import type { CertificatePart, EntryDetail } from '@/api/types'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSecondPasswordStore } from '@/stores/secondPasswordStore'
 import { useToast } from '@/hooks/useToast'
-import { describeApiError, ERRCODE_INVALID_SECOND_PASS } from '@/lib/apiErrors'
+import {
+  describeApiError,
+  describeEntryReadError,
+  ERRCODE_INVALID_SECOND_PASS,
+} from '@/lib/apiErrors'
 import { formatBytes } from '@/lib/format'
 
 export function CertificateDetail({ entry }: { entry: EntryDetail }) {
@@ -34,11 +38,12 @@ export function CertificateDetail({ entry }: { entry: EntryDetail }) {
     [entry.id, dbId],
   )
 
-  function reportError(err: unknown, title: string) {
+  // `read`: a download - 403/4030 then says the entry cannot be opened, not changed.
+  function reportError(err: unknown, title: string, read = false) {
     if (err instanceof ApiError && err.status === 403 && err.code === ERRCODE_INVALID_SECOND_PASS) {
       useSecondPasswordStore.getState().clearSecondPassword(entry.id)
     }
-    toast.error(describeApiError(err, t), { title })
+    toast.error(read ? describeEntryReadError(err, t) : describeApiError(err, t), { title })
   }
 
   async function downloadFile(part: CertificatePart) {
@@ -63,7 +68,7 @@ export function CertificateDetail({ entry }: { entry: EntryDetail }) {
         URL.revokeObjectURL(url)
       }
     } catch (err) {
-      if (seq === sequence.current) reportError(err, t('toast.downloadFailed'))
+      if (seq === sequence.current) reportError(err, t('toast.downloadFailed'), true)
     } finally {
       if (seq === sequence.current) setBusy(false)
     }

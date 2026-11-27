@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { describeApiError } from '@/lib/apiErrors'
+import { describeEntryReadError } from '@/lib/apiErrors'
 
 interface SecondPasswordPromptProps {
   open: boolean
@@ -43,7 +43,7 @@ export function SecondPasswordPrompt({
     try {
       await onSubmit(password)
     } catch (err) {
-      setError(describeApiError(err, t))
+      setError(describeEntryReadError(err, t))
       setPassword('')
     } finally {
       setIsSubmitting(false)

@@ -24,6 +24,11 @@ import type { TotpField } from '@/lib/totp'
  */
 export function describeApiError(err: unknown, t: TFunction): string {
   if (err instanceof ApiError) {
+    // A change of an entry under a second password: the browser's language,
+    // whatever the server's message says.
+    if (err.status === 403 && err.code === ERRCODE_SECOND_PASSWORD_READ_ONLY) {
+      return t('secondPassword.readOnly')
+    }
     if (err.message) return err.message
     return defaultMessageForStatus(err.status, t)
   }
@@ -58,6 +63,26 @@ export function describeLoginError(err: ApiError, t: TFunction): string {
 
 /** HTTP 403 sub-code: wrong or missing second password (all server versions). */
 export const ERRCODE_INVALID_SECOND_PASS = 4031
+/**
+ * PD Server 20+: HTTP 403 sub-code - the entry is protected by a second
+ * password that the server does not open for the web client: on a read where
+ * the database does not allow it or the server cannot open the entry, on every
+ * change of such an entry. Not a wrong password (that is 4031): do not ask for
+ * it again and do not retry.
+ */
+export const ERRCODE_SECOND_PASSWORD_READ_ONLY = 4030
+
+/**
+ * Message for a failed read of an entry (its details, or the check the
+ * second-password prompt makes): 403/4030 in the browser's language, every
+ * other error as describeApiError words it.
+ */
+export function describeEntryReadError(err: unknown, t: TFunction): string {
+  if (err instanceof ApiError && err.status === 403 && err.code === ERRCODE_SECOND_PASSWORD_READ_ONLY) {
+    return t('secondPassword.cannotOpen')
+  }
+  return describeApiError(err, t)
+}
 /** PD Server 20+: HTTP 404 sub-code from GET /entries/{id}/otp - the entry exists but has no one-time code. */
 export const ERRCODE_NO_ONE_TIME_CODE = 4041
 
@@ -70,9 +95,9 @@ export const ERRCODE_NO_ONE_TIME_CODE = 4041
  */
 export function describeOtpError(status: number, code: number, t: TFunction): string {
   if (status === 403) {
-    return code === ERRCODE_INVALID_SECOND_PASS
-      ? t('secondPassword.wrongPassword')
-      : t('entry.oneTimeCode.notAvailable')
+    if (code === ERRCODE_INVALID_SECOND_PASS) return t('secondPassword.wrongPassword')
+    if (code === ERRCODE_SECOND_PASSWORD_READ_ONLY) return t('secondPassword.cannotOpen')
+    return t('entry.oneTimeCode.notAvailable')
   }
   if (status === 404) {
     return code === ERRCODE_NO_ONE_TIME_CODE ? t('entry.oneTimeCode.none') : t('errors.notFound')

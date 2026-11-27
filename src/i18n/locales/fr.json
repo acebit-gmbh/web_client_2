@@ -164,7 +164,9 @@
     "protected": "Protégé",
     "label": "Second mot de passe",
     "unlock": "Déverrouiller",
-    "wrongPassword": "Second mot de passe incorrect"
+    "wrongPassword": "Second mot de passe incorrect",
+    "cannotOpen": "Cette entrée est protégée par un second mot de passe et ne peut pas être ouverte dans le client Web.",
+    "readOnly": "Cette entrée est protégée par un second mot de passe et ne peut pas être modifiée dans le client Web."
   },
   "sidebar": {
     "folders": "Dossiers",
